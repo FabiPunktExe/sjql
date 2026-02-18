@@ -1,9 +1,6 @@
 package de.fabiexe.sjql;
 
-import de.fabiexe.sjql.column.Column;
-import de.fabiexe.sjql.column.DoubleColumn;
-import de.fabiexe.sjql.column.IntColumn;
-import de.fabiexe.sjql.column.StringColumn;
+import de.fabiexe.sjql.column.*;
 import de.fabiexe.sjql.row.BasicWritableRow;
 import de.fabiexe.sjql.row.ConstructorRowMapper;
 import de.fabiexe.sjql.row.ReadableRow;
@@ -14,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -58,6 +56,22 @@ public class Table<T> {
 
     public @NotNull Column<String> stringColumn(@NotNull String name, int length) {
         return column(new StringColumn(this, name, length));
+    }
+
+    public @NotNull Column<Long> longColumn(@NotNull String name) {
+        return column(new LongColumn(this, name));
+    }
+
+    public @NotNull Column<Float> floatColumn(@NotNull String name) {
+        return column(new FloatColumn(this, name));
+    }
+
+    public @NotNull Column<Boolean> booleanColumn(@NotNull String name) {
+        return column(new BooleanColumn(this, name));
+    }
+
+    public @NotNull Column<UUID> uuidColumn(@NotNull String name) {
+        return column(new UUIDColumn(this, name));
     }
 
     public void insert(@NotNull Consumer<WritableRow> builder) throws SQLException {

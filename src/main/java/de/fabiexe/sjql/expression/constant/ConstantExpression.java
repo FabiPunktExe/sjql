@@ -4,6 +4,6 @@ import de.fabiexe.sjql.expression.Expression;
 import org.jetbrains.annotations.Nullable;
 
 public sealed interface ConstantExpression<T> extends Expression
-        permits DoubleExpression, IntExpression, StringExpression {
+        permits BooleanExpression, DoubleExpression, FloatExpression, IntExpression, LongExpression, StringExpression, UUIDExpression {
     @Nullable T value();
 }

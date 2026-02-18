@@ -5,7 +5,8 @@ import de.fabiexe.sjql.expression.Expression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract sealed class BasicColumn<T> implements Column<T> permits IntColumn, DoubleColumn, StringColumn {
+public abstract sealed class BasicColumn<T> implements Column<T>
+        permits BooleanColumn, DoubleColumn, FloatColumn, IntColumn, LongColumn, StringColumn, UUIDColumn {
     protected final Table<?> table;
     protected final String name;
     protected final Class<T> type;

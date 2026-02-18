@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public sealed interface Column<T> permits BasicColumn {
     @NotNull Table<?> table();
     @NotNull String name();
@@ -22,6 +24,10 @@ public sealed interface Column<T> permits BasicColumn {
             case Integer i -> Expression.constant(i);
             case Double d -> Expression.constant(d);
             case String s -> Expression.constant(s);
+            case Long l -> Expression.constant(l);
+            case Float f -> Expression.constant(f);
+            case Boolean b -> Expression.constant(b);
+            case UUID u -> Expression.constant(u);
             default -> throw new IllegalArgumentException("Unsupported value type: " + defaultValue.getClass().getName());
         });
     }
@@ -39,6 +45,10 @@ public sealed interface Column<T> permits BasicColumn {
             case Integer i -> Expression.constant(i);
             case Double d -> Expression.constant(d);
             case String s -> Expression.constant(s);
+            case Long l -> Expression.constant(l);
+            case Float f -> Expression.constant(f);
+            case Boolean b -> Expression.constant(b);
+            case UUID u -> Expression.constant(u);
             default -> throw new IllegalArgumentException("Unsupported value type: " + value.getClass().getName());
         });
     }

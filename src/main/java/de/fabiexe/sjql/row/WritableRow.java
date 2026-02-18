@@ -2,11 +2,10 @@ package de.fabiexe.sjql.row;
 
 import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.expression.Expression;
-import de.fabiexe.sjql.expression.constant.DoubleExpression;
-import de.fabiexe.sjql.expression.constant.IntExpression;
-import de.fabiexe.sjql.expression.constant.StringExpression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 public interface WritableRow {
     <U> void set(@NotNull Column<U> column, @NotNull Expression value);
@@ -14,11 +13,15 @@ public interface WritableRow {
     boolean contains(@NotNull Column<?> column);
 
     default <U> void set(@NotNull Column<U> column, @NotNull U value) {
-        switch (value) {
-            case Integer i -> set(column, new IntExpression(i));
-            case Double d -> set(column, new DoubleExpression(d));
-            case String s -> set(column, new StringExpression(s));
+        set(column, switch (value) {
+            case Integer i -> Expression.constant(i);
+            case Double d -> Expression.constant(d);
+            case String s -> Expression.constant(s);
+            case Long l -> Expression.constant(l);
+            case Float f -> Expression.constant(f);
+            case Boolean b -> Expression.constant(b);
+            case UUID u -> Expression.constant(u);
             default -> throw new IllegalArgumentException("Unsupported value type: " + value.getClass().getName());
-        }
+        });
     }
 }

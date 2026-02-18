@@ -2,9 +2,7 @@ package de.fabiexe.sjql;
 
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -12,9 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class H2Test {
     @Test
-    public void test(@TempDir Path tempDir) throws SQLException {
+    public void test() throws SQLException {
         JdbcDataSource dataSource = new JdbcDataSource();
-        dataSource.setUrl("jdbc:h2:" + tempDir.resolve("test").toAbsolutePath());
+        dataSource.setUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
 
         Database database = Database.create(dataSource);
         assertNotNull(database);

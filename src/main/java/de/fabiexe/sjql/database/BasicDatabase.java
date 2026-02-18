@@ -4,10 +4,7 @@ import de.fabiexe.sjql.Database;
 import de.fabiexe.sjql.Query;
 import de.fabiexe.sjql.Statement;
 import de.fabiexe.sjql.Table;
-import de.fabiexe.sjql.column.Column;
-import de.fabiexe.sjql.column.DoubleColumn;
-import de.fabiexe.sjql.column.IntColumn;
-import de.fabiexe.sjql.column.StringColumn;
+import de.fabiexe.sjql.column.*;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
 import de.fabiexe.sjql.query.BasicDeleteStatement;
 import de.fabiexe.sjql.query.BasicRowQuery;
@@ -39,6 +36,10 @@ public abstract class BasicDatabase implements Database {
             case IntColumn _ -> "INT";
             case DoubleColumn _ -> "DOUBLE";
             case StringColumn stringColumn -> "VARCHAR(" + stringColumn.getMaxLength() + ")";
+            case LongColumn _ -> "BIGINT";
+            case FloatColumn _ -> "FLOAT";
+            case BooleanColumn _ -> "BOOLEAN";
+            case UUIDColumn _ -> "UUID";
         };
     }
 

@@ -38,7 +38,8 @@ public class BasicRowQuery<T> extends BasicQuery<T, List<ReadableRow<T>>> {
                     Map<Column<?>, Object> rowContent = new HashMap<>();
                     List<Column<?>> columns = table.getColumns();
                     for (int i = 0; i < columns.size(); i++) {
-                        rowContent.put(columns.get(i), resultSet.getObject(i + 1));
+                        Column<?> column = columns.get(i);
+                        rowContent.put(column, SQLUtil.getObject(resultSet, i + 1, column));
                     }
                     result.add(new BasicReadableRow<>(table, rowContent));
                 }
