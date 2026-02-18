@@ -5,6 +5,7 @@ import de.fabiexe.sjql.column.DoubleColumn;
 import de.fabiexe.sjql.column.IntColumn;
 import de.fabiexe.sjql.column.StringColumn;
 import de.fabiexe.sjql.expression.Expression;
+import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
 import de.fabiexe.sjql.expression.constant.DoubleExpression;
 import de.fabiexe.sjql.expression.constant.IntExpression;
@@ -41,6 +42,7 @@ public class SQLUtil {
     public static @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql(@NotNull Expression expression) {
         return switch (expression) {
             case ConstantExpression<?> constantExpression -> Map.entry("?", List.of(constantExpression));
+            case ColumnExpression<?> columnExpression -> Map.entry(columnExpression.column().name(), List.of());
             case EqualsExpression(Expression a, Expression b) -> {
                 Map.Entry<String, List<ConstantExpression<?>>> aSql = buildSql(a);
                 Map.Entry<String, List<ConstantExpression<?>>> bSql = buildSql(b);

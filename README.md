@@ -29,6 +29,10 @@ public void example() throws SQLException {
         List<Coffee> coffees = Coffee.TABLE.select()
                 .where(Coffee.NAME.eq("Espresso"))
                 .execute(); // [Coffee[name=Espresso, price=2.5]]
+
+        Coffee.TABLE.delete()
+                .where(Coffee.NAME.eq("Espresso"))
+                .execute();
     });
 }
 ```

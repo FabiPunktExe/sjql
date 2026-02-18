@@ -19,6 +19,7 @@ public interface Database {
     void deleteTable(@NotNull Table<?> table) throws SQLException;
     boolean tableExists(@NotNull Table<?> table) throws SQLException;
     <T> void insert(@NotNull Table<T> table, @NotNull WritableRow row) throws SQLException;
+    <T> @NotNull Statement delete(@NotNull Table<T> table);
     <T> @NotNull Query<List<ReadableRow<T>>> selectRows(@NotNull Table<T> table);
     <T> @NotNull Query<List<T>> select(@NotNull Table<T> table);
 

@@ -2,12 +2,14 @@ package de.fabiexe.sjql.database;
 
 import de.fabiexe.sjql.Database;
 import de.fabiexe.sjql.Query;
+import de.fabiexe.sjql.Statement;
 import de.fabiexe.sjql.Table;
 import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.column.DoubleColumn;
 import de.fabiexe.sjql.column.IntColumn;
 import de.fabiexe.sjql.column.StringColumn;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
+import de.fabiexe.sjql.query.BasicDeleteStatement;
 import de.fabiexe.sjql.query.BasicRowQuery;
 import de.fabiexe.sjql.query.BasicValueQuery;
 import de.fabiexe.sjql.row.ReadableRow;
@@ -71,6 +73,11 @@ public abstract class BasicDatabase implements Database {
                 statement.execute();
             }
         }
+    }
+
+    @Override
+    public <T> @NotNull Statement delete(@NotNull Table<T> table) {
+        return new BasicDeleteStatement<>(table, dataSource::getConnection);
     }
 
     @Override

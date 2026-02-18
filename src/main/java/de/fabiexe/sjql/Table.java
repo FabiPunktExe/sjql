@@ -66,6 +66,10 @@ public class Table<T> {
         Database.CURRENT_DATABASE.get().insert(this, row);
     }
 
+    public @NotNull DeleteStatement delete() {
+        return (DeleteStatement) Database.CURRENT_DATABASE.get().delete(this);
+    }
+
     public @NotNull Query<List<T>> select() {
         return Database.CURRENT_DATABASE.get().select(this);
     }

@@ -38,6 +38,25 @@ public class SQLiteTest {
         assertNotEquals(List.of(new Coffee("Latte", 2.5)), coffees);
         assertNotEquals(List.of(new Coffee("Espresso", 1.5)), coffees);
 
+        database.throwingTransaction(() -> {
+            Coffee.TABLE.insert(row -> {
+                row.set(Coffee.NAME, "Latte");
+                row.set(Coffee.PRICE, 3.5);
+            });
+        });
+
+        count = database.throwingTransaction(Coffee.TABLE::count);
+        assertEquals(2, count);
+
+        database.throwingTransaction(() -> {
+            Coffee.TABLE.delete()
+                    .where(Coffee.NAME.eq("Espresso"))
+                    .execute();
+        });
+
+        count = database.throwingTransaction(Coffee.TABLE::count);
+        assertEquals(1, count);
+
         database.deleteTable(Coffee.TABLE);
         assertFalse(database.tableExists(Coffee.TABLE));
     }
