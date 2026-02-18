@@ -25,7 +25,7 @@ public class SQLUtil {
     public static void setObject(@NotNull PreparedStatement statement, int index, @NotNull ConstantExpression<?> expression) throws SQLException {
         switch (expression) {
             case IntExpression(Integer value) -> statement.setObject(index, value, Types.INTEGER);
-            case DoubleExpression(Double value) -> statement.setObject(index, value, Types.REAL);
+            case DoubleExpression(Double value) -> statement.setObject(index, value, Types.DOUBLE);
             case StringExpression(String value) -> statement.setObject(index, value, Types.VARCHAR);
         }
     }

@@ -32,10 +32,10 @@ public abstract class BasicDatabase implements Database {
         return dataSource;
     }
 
-    private @NotNull String getColumnType(Column<?> column) {
+    protected @NotNull String getColumnType(Column<?> column) {
         return switch (column) {
             case IntColumn _ -> "INT";
-            case DoubleColumn _ -> "REAL";
+            case DoubleColumn _ -> "DOUBLE";
             case StringColumn stringColumn -> "VARCHAR(" + stringColumn.getMaxLength() + ")";
         };
     }
