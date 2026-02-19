@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public interface Query<T> {
     @NotNull Query<T> where(@NotNull Expression condition);
@@ -16,4 +17,8 @@ public interface Query<T> {
     @NotNull Query<T> limit(@Nullable Long limit);
     @NotNull Query<Long> count();
     @Nullable T execute() throws SQLException;
+
+    default @NotNull T executeNotNull() throws SQLException {
+        return Objects.requireNonNull(execute(), "Query result is null");
+    }
 }

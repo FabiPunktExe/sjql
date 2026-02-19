@@ -11,10 +11,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class BasicValueQuery<T> extends BasicQuery<T, List<T>> {
-    public BasicValueQuery(@NotNull Table<T> table, @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier) {
+    public BasicValueQuery(
+            @NotNull Table<T> table,
+            @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier
+    ) {
         super(table, connectionSupplier);
     }
 
@@ -25,7 +27,7 @@ public class BasicValueQuery<T> extends BasicQuery<T, List<T>> {
                 .where(condition)
                 .orderBy(ordering)
                 .limit(limit);
-        for (ReadableRow<T> row : Objects.requireNonNull(rowQuery.execute())) {
+        for (ReadableRow<T> row : rowQuery.executeNotNull()) {
             result.add(table.getRowMapper().apply(row));
         }
         return result;

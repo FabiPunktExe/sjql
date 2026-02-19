@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -89,7 +88,7 @@ public class Table<T> {
     }
 
     public long count() throws SQLException {
-        return Objects.requireNonNull(select().count().execute());
+        return select().count().executeNotNull();
     }
 
     public @NotNull String name() {

@@ -2,9 +2,9 @@ package de.fabiexe.sjql.util;
 
 import de.fabiexe.sjql.column.*;
 import de.fabiexe.sjql.expression.Expression;
-import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
 import de.fabiexe.sjql.expression.constant.*;
-import de.fabiexe.sjql.expression.logical.EqualsExpression;
+import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
+import de.fabiexe.sjql.expression.logical.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +12,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class SQLUtil {
     public static void setObject(@NotNull PreparedStatement statement, int index, @NotNull ConstantExpression<?> expression) throws SQLException {
@@ -43,10 +46,44 @@ public class SQLUtil {
         return switch (expression) {
             case ConstantExpression<?> constantExpression -> Map.entry("?", List.of(constantExpression));
             case ColumnExpression<?> columnExpression -> Map.entry(columnExpression.column().name(), List.of());
-            case EqualsExpression(Expression a, Expression b) -> {
+            case LogicalExpression logicalExpression -> {
+                Expression a, b;
+                String operator;
+                switch (logicalExpression) {
+                    case EqualsExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "=";
+                    }
+                    case GreaterThanExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = ">";
+                    }
+                    case GreaterThanOrEqualExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = ">=";
+                    }
+                    case LessThanExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "<";
+                    }
+                    case LessThanOrEqualExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "<=";
+                    }
+                    case NotEqualsExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "!=";
+                    }
+                }
                 Map.Entry<String, List<ConstantExpression<?>>> aSql = buildSql(a);
                 Map.Entry<String, List<ConstantExpression<?>>> bSql = buildSql(b);
-                String sql = "(" + aSql.getKey() + ") = (" + bSql.getKey() + ")";
+                String sql = "(" + aSql.getKey() + ") " + operator + " (" + bSql.getKey() + ")";
                 List<ConstantExpression<?>> parameters = new ArrayList<>();
                 parameters.addAll(aSql.getValue());
                 parameters.addAll(bSql.getValue());

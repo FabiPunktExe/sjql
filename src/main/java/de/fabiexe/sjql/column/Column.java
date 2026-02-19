@@ -3,12 +3,10 @@ package de.fabiexe.sjql.column;
 import de.fabiexe.sjql.Table;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
-import de.fabiexe.sjql.expression.logical.EqualsExpression;
+import de.fabiexe.sjql.expression.logical.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.UUID;
 
 public sealed interface Column<T> permits BasicColumn {
     @NotNull Table<?> table();
@@ -20,16 +18,7 @@ public sealed interface Column<T> permits BasicColumn {
 
     @Contract("_ -> this")
     default @NotNull Column<T> defaultValue(@NotNull T defaultValue) {
-        return defaultValue(switch (defaultValue) {
-            case Integer i -> Expression.constant(i);
-            case Double d -> Expression.constant(d);
-            case String s -> Expression.constant(s);
-            case Long l -> Expression.constant(l);
-            case Float f -> Expression.constant(f);
-            case Boolean b -> Expression.constant(b);
-            case UUID u -> Expression.constant(u);
-            default -> throw new IllegalArgumentException("Unsupported value type: " + defaultValue.getClass().getName());
-        });
+        return defaultValue(Expression.constant(defaultValue));
     }
 
     default @NotNull Expression eq(@NotNull Expression value) {
@@ -41,15 +30,66 @@ public sealed interface Column<T> permits BasicColumn {
     }
 
     default @NotNull Expression eq(@NotNull T value) {
-        return eq(switch (value) {
-            case Integer i -> Expression.constant(i);
-            case Double d -> Expression.constant(d);
-            case String s -> Expression.constant(s);
-            case Long l -> Expression.constant(l);
-            case Float f -> Expression.constant(f);
-            case Boolean b -> Expression.constant(b);
-            case UUID u -> Expression.constant(u);
-            default -> throw new IllegalArgumentException("Unsupported value type: " + value.getClass().getName());
-        });
+        return eq(Expression.constant(value));
+    }
+
+    default @NotNull Expression ne(@NotNull Expression value) {
+        return new NotEqualsExpression(new ColumnExpression<>(this), value);
+    }
+
+    default @NotNull Expression ne(@NotNull Column<? extends T> other) {
+        return ne(new ColumnExpression<>(other));
+    }
+
+    default @NotNull Expression ne(@NotNull T value) {
+        return ne(Expression.constant(value));
+    }
+
+    default @NotNull Expression gt(@NotNull Expression value) {
+        return new GreaterThanExpression(new ColumnExpression<>(this), value);
+    }
+
+    default @NotNull Expression gt(@NotNull Column<? extends T> other) {
+        return gt(new ColumnExpression<>(other));
+    }
+
+    default @NotNull Expression gt(@NotNull T value) {
+        return gt(Expression.constant(value));
+    }
+
+    default @NotNull Expression gte(@NotNull Expression value) {
+        return new GreaterThanOrEqualExpression(new ColumnExpression<>(this), value);
+    }
+
+    default @NotNull Expression gte(@NotNull Column<? extends T> other) {
+        return gte(new ColumnExpression<>(other));
+    }
+
+    default @NotNull Expression gte(@NotNull T value) {
+        return gte(Expression.constant(value));
+    }
+
+    default @NotNull Expression lt(@NotNull Expression value) {
+        return new LessThanExpression(new ColumnExpression<>(this), value);
+    }
+
+    default @NotNull Expression lt(@NotNull Column<? extends T> other) {
+        return lt(new ColumnExpression<>(other));
+    }
+
+    default @NotNull Expression lt(@NotNull T value) {
+        return lt(Expression.constant(value));
+    }
+
+    default @NotNull Expression lte(@NotNull Expression value) {
+        return new LessThanOrEqualExpression(new ColumnExpression<>(this), value);
+    }
+
+    default @NotNull Expression lte(@NotNull Column<? extends T> other) {
+        return lte(new ColumnExpression<>(other));
+    }
+
+    default @NotNull Expression lte(@NotNull T value) {
+        return lte(Expression.constant(value));
     }
 }
