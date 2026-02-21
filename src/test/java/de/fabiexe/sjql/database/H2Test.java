@@ -1,4 +1,4 @@
-package de.fabiexe.sjql;
+package de.fabiexe.sjql.database;
 
 import org.h2.jdbcx.JdbcDataSource;
 

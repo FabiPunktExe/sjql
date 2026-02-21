@@ -1,5 +1,7 @@
-package de.fabiexe.sjql;
+package de.fabiexe.sjql.database;
 
+import de.fabiexe.sjql.Coffee;
+import de.fabiexe.sjql.Database;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

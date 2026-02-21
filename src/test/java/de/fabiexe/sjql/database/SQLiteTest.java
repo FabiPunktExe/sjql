@@ -1,4 +1,4 @@
-package de.fabiexe.sjql;
+package de.fabiexe.sjql.database;
 
 import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.SQLiteDataSource;
