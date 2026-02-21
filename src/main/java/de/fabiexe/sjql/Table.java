@@ -87,6 +87,32 @@ public class Table<T> {
         return Database.CURRENT_DATABASE.get().update(this, builder);
     }
 
+    public <U> @NotNull UpdateStatement update(@NotNull Column<U> column, U value) {
+        return update(row -> row.set(column, value));
+    }
+
+    public <U, V> @NotNull UpdateStatement update(
+            @NotNull Column<U> column1, U value1,
+            @NotNull Column<V> column2, V value2
+    ) {
+        return update(row -> {
+            row.set(column1, value1);
+            row.set(column2, value2);
+        });
+    }
+
+    public <U, V, W> @NotNull UpdateStatement update(
+            @NotNull Column<U> column1, U value1,
+            @NotNull Column<V> column2, V value2,
+            @NotNull Column<W> column3, W value3
+    ) {
+        return update(row -> {
+            row.set(column1, value1);
+            row.set(column2, value2);
+            row.set(column3, value3);
+        });
+    }
+
     public @NotNull Query<List<T>> select() {
         return Database.CURRENT_DATABASE.get().select(this);
     }
