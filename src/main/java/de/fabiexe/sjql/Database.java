@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public interface Database {
@@ -19,13 +20,10 @@ public interface Database {
     void deleteTable(@NotNull Table<?> table) throws SQLException;
     boolean tableExists(@NotNull Table<?> table) throws SQLException;
     <T> void insert(@NotNull Table<T> table, @NotNull WritableRow row) throws SQLException;
-    <T> @NotNull Statement delete(@NotNull Table<T> table);
+    <T> @NotNull DeleteStatement delete(@NotNull Table<T> table);
+    <T> @NotNull UpdateStatement update(@NotNull Table<T> table, @NotNull Consumer<WritableRow> builder);
     <T> @NotNull Query<List<ReadableRow<T>>> selectRows(@NotNull Table<T> table);
     <T> @NotNull Query<List<T>> select(@NotNull Table<T> table);
-
-    default @NotNull Query<Long> count(@NotNull Table<?> table) {
-        return selectRows(table).count();
-    }
 
     default void transaction(@NotNull Runnable action) {
         ScopedValue.where(CURRENT_DATABASE, this).run(action);

@@ -34,6 +34,7 @@ Tables are typically defined as static constants within a Java class or record.
 - SJQL uses a fluent API for building queries.
 - `select()` returns a `Query<List<T>>`.
 - `delete()` returns a `DeleteStatement`.
+- `update(Consumer<WritableRow> builder)` returns an `UpdateStatement`.
 - Support for `where()` clauses using expressions (e.g., `Column.eq(value)`, `Column.gt(value)`).
 
 ## Architecture Details

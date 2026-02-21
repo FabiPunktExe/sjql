@@ -30,6 +30,10 @@ public void example() throws SQLException {
                 .where(Coffee.NAME.eq("Espresso"))
                 .execute(); // [Coffee[name=Espresso, price=2.5]]
 
+        Coffee.TABLE.update(row -> row.set(Coffee.PRICE, 2.8))
+                .where(Coffee.NAME.eq("Espresso"))
+                .execute();
+
         Coffee.TABLE.delete()
                 .where(Coffee.NAME.eq("Espresso"))
                 .execute();

@@ -80,7 +80,11 @@ public class Table<T> {
     }
 
     public @NotNull DeleteStatement delete() {
-        return (DeleteStatement) Database.CURRENT_DATABASE.get().delete(this);
+        return Database.CURRENT_DATABASE.get().delete(this);
+    }
+
+    public @NotNull UpdateStatement update(@NotNull Consumer<WritableRow> builder) {
+        return Database.CURRENT_DATABASE.get().update(this, builder);
     }
 
     public @NotNull Query<List<T>> select() {

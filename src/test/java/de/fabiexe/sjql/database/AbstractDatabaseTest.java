@@ -114,4 +114,23 @@ public abstract class AbstractDatabaseTest {
                 .execute());
         assertEquals(List.of(new Coffee("Latte", 3.5)), coffees);
     }
+
+    @Test
+    public void testUpdate() throws SQLException {
+        database.throwingTransaction(() -> {
+            Coffee.TABLE.insert(row -> {
+                row.set(Coffee.NAME, "Espresso");
+                row.set(Coffee.PRICE, 2.5);
+            });
+        });
+
+        database.throwingTransaction(() -> {
+            Coffee.TABLE.update(row -> row.set(Coffee.PRICE, 3.0))
+                    .where(Coffee.NAME.eq("Espresso"))
+                    .execute();
+        });
+
+        List<Coffee> coffees = database.throwingTransaction(() -> Coffee.TABLE.select().execute());
+        assertEquals(List.of(new Coffee("Espresso", 3.0)), coffees);
+    }
 }
