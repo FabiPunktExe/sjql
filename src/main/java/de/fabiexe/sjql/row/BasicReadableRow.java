@@ -23,7 +23,7 @@ public class BasicReadableRow<T> implements ReadableRow<T> {
         if (table.hasColumn(column)) {
             return (U) values.get(column);
         } else {
-            throw new IllegalArgumentException("Column " + column.name() + " does not exist in table " + table.name());
+            throw new IllegalArgumentException("Column " + column.name() + " does not exist in table " + table.getName());
         }
     }
 

@@ -121,7 +121,7 @@ public class Table<T> {
         return select().count().executeNotNull();
     }
 
-    public @NotNull String name() {
+    public @NotNull String getName() {
         return name;
     }
 

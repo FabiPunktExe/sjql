@@ -53,7 +53,7 @@ public class BasicUpdateStatement<T> implements UpdateStatement {
     }
 
     private @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
-        StringBuilder sql = new StringBuilder("UPDATE ").append(table.name()).append(" SET ");
+        StringBuilder sql = new StringBuilder("UPDATE ").append(table.getName()).append(" SET ");
         List<ConstantExpression<?>> parameters = new ArrayList<>();
 
         boolean first = true;

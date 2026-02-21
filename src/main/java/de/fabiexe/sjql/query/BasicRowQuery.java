@@ -49,7 +49,7 @@ public class BasicRowQuery<T> extends BasicQuery<T, List<ReadableRow<T>>> {
     }
 
     private @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
-        StringBuilder sql = new StringBuilder("SELECT * FROM ").append(table.name());
+        StringBuilder sql = new StringBuilder("SELECT * FROM ").append(table.getName());
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {
             sql.append(" WHERE ");

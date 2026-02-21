@@ -45,7 +45,7 @@ public abstract class BasicDatabase implements Database {
     public void createTable(@NotNull Table<?> table) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
-                    .append(table.name())
+                    .append(table.getName())
                     .append(" (");
 
             List<Column<?>> columns = table.getColumns();
@@ -67,7 +67,7 @@ public abstract class BasicDatabase implements Database {
     @Override
     public void deleteTable(@NotNull Table<?> table) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            String sql = "DROP TABLE IF EXISTS " + table.name();
+            String sql = "DROP TABLE IF EXISTS " + table.getName();
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.execute();
             }
@@ -94,7 +94,7 @@ public abstract class BasicDatabase implements Database {
 
         try (Connection connection = dataSource.getConnection()) {
             StringBuilder sql = new StringBuilder("INSERT INTO ")
-                    .append(table.name())
+                    .append(table.getName())
                     .append(" (");
 
             boolean first = true;

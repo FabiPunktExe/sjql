@@ -22,7 +22,7 @@ public class BasicWritableRow<T> implements WritableRow {
         if (table.hasColumn(column)) {
             values.put(column, value);
         } else {
-            throw new IllegalArgumentException("Column " + column.name() + " does not exist in table " + table.name());
+            throw new IllegalArgumentException("Column " + column.name() + " does not exist in table " + table.getName());
         }
     }
 
@@ -31,7 +31,7 @@ public class BasicWritableRow<T> implements WritableRow {
         if (table.hasColumn(column)) {
             return values.getOrDefault(column, column.defaultValue());
         } else {
-            throw new IllegalArgumentException("Column " + column.name() + " does not exist in table " + table.name());
+            throw new IllegalArgumentException("Column " + column.name() + " does not exist in table " + table.getName());
         }
     }
 

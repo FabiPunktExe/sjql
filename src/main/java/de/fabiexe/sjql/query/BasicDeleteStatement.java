@@ -46,7 +46,7 @@ public class BasicDeleteStatement<T> implements DeleteStatement {
     }
 
     private @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
-        StringBuilder sql = new StringBuilder("DELETE FROM ").append(table.name());
+        StringBuilder sql = new StringBuilder("DELETE FROM ").append(table.getName());
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {
             sql.append(" WHERE ");

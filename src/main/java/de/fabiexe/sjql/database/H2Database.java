@@ -17,7 +17,7 @@ public class H2Database extends BasicDatabase {
     @Override
     public boolean tableExists(@NotNull Table<?> table) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            String tableName = table.name().toUpperCase();
+            String tableName = table.getName().toUpperCase();
             String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '" + tableName + "'";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 try (ResultSet resultSet = statement.executeQuery()) {

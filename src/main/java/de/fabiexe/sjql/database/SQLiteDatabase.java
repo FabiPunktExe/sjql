@@ -17,7 +17,7 @@ public class SQLiteDatabase extends BasicDatabase {
     @Override
     public boolean tableExists(@NotNull Table<?> table) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            String sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='" + table.name() + "'";
+            String sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='" + table.getName() + "'";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 ResultSet resultSet = statement.executeQuery();
                 return resultSet.next() && resultSet.getInt(1) > 0;

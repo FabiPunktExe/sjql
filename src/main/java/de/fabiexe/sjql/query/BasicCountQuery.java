@@ -46,7 +46,7 @@ public class BasicCountQuery<T> extends BasicQuery<T, Long> {
     }
 
     private @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ").append(table.name());
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ").append(table.getName());
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {
             sql.append(" WHERE ");
