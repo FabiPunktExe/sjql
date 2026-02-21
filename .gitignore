@@ -3,7 +3,8 @@ build/
 .kotlin
 
 ### IntelliJ IDEA ###
-.idea/
+.idea/*
+!.idea/sqldialects.xml
 *.iws
 *.iml
 *.ipr

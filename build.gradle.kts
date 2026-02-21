@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "de.fabiexe"
-version = "0.0.1"
+version = "0.1.0"
 
 java {
     toolchain {
@@ -21,6 +21,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.h2)
     testImplementation(libs.sqlite)
+    testImplementation(libs.postgresql)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

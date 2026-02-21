@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/src/main/java/de/fabiexe/sjql/database/BasicDatabase.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/de/fabiexe/sjql/database/H2Database.java" dialect="H2" />
+    <file url="file://$PROJECT_DIR$/src/main/java/de/fabiexe/sjql/database/PostgreSQLDatabase.java" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/de/fabiexe/sjql/database/SQLiteDatabase.java" dialect="SQLite" />
+  </component>
+</project>

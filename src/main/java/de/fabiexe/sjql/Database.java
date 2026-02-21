@@ -1,6 +1,7 @@
 package de.fabiexe.sjql;
 
 import de.fabiexe.sjql.database.H2Database;
+import de.fabiexe.sjql.database.PostgreSQLDatabase;
 import de.fabiexe.sjql.database.SQLiteDatabase;
 import de.fabiexe.sjql.row.ReadableRow;
 import de.fabiexe.sjql.row.WritableRow;
@@ -58,6 +59,8 @@ public interface Database {
                 return new SQLiteDatabase(dataSource);
             } else if (url.startsWith("jdbc:h2:")) {
                 return new H2Database(dataSource);
+            } else if (url.startsWith("jdbc:postgresql:")) {
+                return new PostgreSQLDatabase(dataSource);
             } else {
                 return null;
             }
