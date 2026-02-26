@@ -13,8 +13,13 @@ public sealed interface Column<T> permits BasicColumn {
     @NotNull String name();
     @NotNull Class<T> type();
     @Nullable Expression defaultValue();
+    boolean isPrimaryKey();
+
     @Contract("_ -> this")
     @NotNull Column<T> defaultValue(@NotNull Expression defaultValue);
+
+    @Contract("-> this")
+    @NotNull Column<T> primaryKey();
 
     @Contract("_ -> this")
     default @NotNull Column<T> defaultValue(@NotNull T defaultValue) {

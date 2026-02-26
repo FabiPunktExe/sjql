@@ -6,6 +6,7 @@ SJQL is a lightweight, type-safe Java library for interacting with SQL databases
 ## Supported Databases
 - H2
 - SQLite
+- PostgreSQL
 
 ## Core Concepts
 
@@ -13,11 +14,12 @@ SJQL is a lightweight, type-safe Java library for interacting with SQL databases
 Tables are typically defined as static constants within a Java class or record.
 - Use `new Table<>("table_name", Record.class)` to define a table.
 - Define columns using methods like `table.stringColumn("name", length)`, `table.intColumn("name")`, etc.
+- Mark a column as primary key using `.primaryKey()`.
 - Example:
   ```java
   public record User(String name, int age) {
       public static final Table<User> TABLE = new Table<>("users", User.class);
-      public static final Column<String> NAME = TABLE.stringColumn("name", 64);
+      public static final Column<String> NAME = TABLE.stringColumn("name", 64).primaryKey();
       public static final Column<Integer> AGE = TABLE.intColumn("age");
   }
   ```
@@ -37,12 +39,21 @@ Tables are typically defined as static constants within a Java class or record.
 - `update(Consumer<WritableRow> builder)` returns an `UpdateStatement`.
 - Support for `where()` clauses using expressions (e.g., `Column.eq(value)`, `Column.gt(value)`).
 
+### 4. Primary Keys & Defaults
+- Use `.primaryKey()` to mark columns as primary keys.
+- Dialect-specific auto-generation for PKs:
+  - PostgreSQL: `SERIAL` (int), `BIGSERIAL` (long), `UUID DEFAULT gen_random_uuid()` (uuid)
+  - H2: `INT AUTO_INCREMENT` (int), `BIGINT AUTO_INCREMENT` (long), `UUID DEFAULT RANDOM_UUID()` (uuid)
+  - SQLite: `INTEGER PRIMARY KEY` (int/long via RowID)
+- Default values can be set via `.defaultValue(value)` or `.defaultValue(expression)`.
+- During inserts, columns may be omitted if they have a default value or are auto-generated.
+
 ## Architecture Details
 
 - **Package Structure:**
   - `de.fabiexe.sjql`: Core interfaces and classes (`Table`, `Database`, `Query`).
   - `de.fabiexe.sjql.column`: Specific column types (String, Int, Boolean, etc.).
-  - `de.fabiexe.sjql.database`: Database-specific implementations (BasicDatabase, H2Database, ...).
+  - `de.fabiexe.sjql.database`: Database-specific implementations (BasicDatabase, H2Database, SQLiteDatabase, PostgreSQLDatabase).
   - `de.fabiexe.sjql.expression`: Logic for SQL expressions and operators.
   - `de.fabiexe.sjql.row`: Mapping between SQL results and Java objects.
 

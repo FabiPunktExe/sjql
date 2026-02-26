@@ -92,4 +92,52 @@ public class SQLUtil {
             default -> throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
         };
     }
+
+    public static @NotNull String buildSqlWithoutPlaceholders(@NotNull Expression expression) {
+        return switch (expression) {
+            case StringExpression stringExpression -> "'" + stringExpression.value().replaceAll("'", "''") + "'";
+            case ConstantExpression<?> constantExpression -> String.valueOf(constantExpression.value());
+            case ColumnExpression<?> columnExpression -> columnExpression.column().name();
+            case LogicalExpression logicalExpression -> {
+                Expression a, b;
+                String operator;
+                switch (logicalExpression) {
+                    case EqualsExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "=";
+                    }
+                    case GreaterThanExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = ">";
+                    }
+                    case GreaterThanOrEqualExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = ">=";
+                    }
+                    case LessThanExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "<";
+                    }
+                    case LessThanOrEqualExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "<=";
+                    }
+                    case NotEqualsExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "!=";
+                    }
+                }
+                String aSql = buildSqlWithoutPlaceholders(a);
+                String bSql = buildSqlWithoutPlaceholders(b);
+                yield "(" + aSql + ") " + operator + " (" + bSql + ")";
+            }
+            default -> throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
+        };
+    }
 }

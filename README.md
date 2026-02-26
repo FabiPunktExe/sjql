@@ -7,9 +7,8 @@ public record Coffee(
         double price
 ) {
     public static final Table<Coffee> TABLE = new Table<>("coffee", Coffee.class);
-    public static final Column<String> NAME = TABLE.stringColumn("name", 64);
-    public static final Column<Double> PRICE = TABLE.doubleColumn("price")
-            .defaultValue(4.5);
+    public static final Column<String> NAME = TABLE.stringColumn("name", 64).primaryKey();
+    public static final Column<Double> PRICE = TABLE.doubleColumn("price").defaultValue(4.5);
 }
 ```
 
@@ -30,7 +29,7 @@ public void example() throws SQLException {
                 .where(Coffee.NAME.eq("Espresso"))
                 .execute(); // [Coffee[name=Espresso, price=2.5]]
 
-        Coffee.TABLE.update(row -> row.set(Coffee.PRICE, 2.8))
+        Coffee.TABLE.update(Coffee.PRICE, 2.8)
                 .where(Coffee.NAME.eq("Espresso"))
                 .execute();
 
