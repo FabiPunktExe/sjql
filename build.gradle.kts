@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    `maven-publish`
 }
 
 group = "de.fabiexe"
@@ -7,8 +8,10 @@ version = "0.2.0"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion = JavaLanguageVersion.of(25)
     }
+    withJavadocJar()
+    withSourcesJar()
 }
 
 repositories {
@@ -28,5 +31,23 @@ dependencies {
 tasks {
     test {
         useJUnitPlatform()
+    }
+}
+
+publishing {
+    repositories {
+        maven("https://repo.diruptio.de/repository/maven-public-releases") {
+            name = "DiruptioPublic"
+            credentials {
+                username = (System.getenv("DIRUPTIO_REPO_USERNAME") ?: project.findProperty("maven_username") ?: "").toString()
+                password = (System.getenv("DIRUPTIO_REPO_PASSWORD") ?: project.findProperty("maven_password") ?: "").toString()
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = "sjql"
+            from(components["java"])
+        }
     }
 }
