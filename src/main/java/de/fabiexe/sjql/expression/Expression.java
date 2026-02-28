@@ -4,6 +4,7 @@ import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.expression.constant.*;
 import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
 import de.fabiexe.sjql.expression.dynamic.CurrentTimestampExpression;
+import de.fabiexe.sjql.expression.logical.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -56,5 +57,45 @@ public interface Expression {
 
     static @NotNull Expression currentTimestamp() {
         return new CurrentTimestampExpression();
+    }
+
+    default @NotNull Expression eq(@NotNull Expression other) {
+        return new EqualsExpression(this, other);
+    }
+
+    default @NotNull Expression neq(@NotNull Expression other) {
+        return new NotEqualsExpression(this, other);
+    }
+
+    default @NotNull Expression gt(@NotNull Expression other) {
+        return new GreaterThanExpression(this, other);
+    }
+
+    default @NotNull Expression gte(@NotNull Expression other) {
+        return new GreaterThanOrEqualExpression(this, other);
+    }
+
+    default @NotNull Expression lt(@NotNull Expression other) {
+        return new LessThanExpression(this, other);
+    }
+
+    default @NotNull Expression lte(@NotNull Expression other) {
+        return new LessThanOrEqualExpression(this, other);
+    }
+
+    default @NotNull Expression and(@NotNull Expression other) {
+        return new AndExpression(this, other);
+    }
+
+    default @NotNull Expression or(@NotNull Expression other) {
+        return new OrExpression(this, other);
+    }
+
+    default @NotNull Expression xor(@NotNull Expression other) {
+        return new XorExpression(this, other);
+    }
+
+    default @NotNull Expression not() {
+        return new NotExpression(this);
     }
 }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public abstract class AbstractDatabaseTest {
     protected Database database;
@@ -121,6 +122,25 @@ public abstract class AbstractDatabaseTest {
         // !=
         coffees = database.throwingTransaction(() -> Coffee.TABLE.select()
                 .where(Coffee.PRICE.ne(2.5))
+                .execute());
+        assertEquals(List.of(new Coffee("Latte", 3.5)), coffees);
+
+        // AND
+        coffees = database.throwingTransaction(() -> Coffee.TABLE.select()
+                .where(Coffee.NAME.eq("Espresso").and(Coffee.PRICE.eq(2.5)))
+                .execute());
+        assertEquals(List.of(new Coffee("Espresso", 2.5)), coffees);
+
+        // OR
+        coffees = database.throwingTransaction(() -> Coffee.TABLE.select()
+                .where(Coffee.NAME.eq("Espresso").or(Coffee.NAME.eq("Latte")))
+                .execute());
+        assertNotNull(coffees);
+        assertEquals(2, coffees.size());
+
+        // NOT
+        coffees = database.throwingTransaction(() -> Coffee.TABLE.select()
+                .where(Coffee.NAME.eq("Espresso").not())
                 .execute());
         assertEquals(List.of(new Coffee("Latte", 3.5)), coffees);
     }

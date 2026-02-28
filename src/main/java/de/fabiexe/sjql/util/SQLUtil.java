@@ -46,6 +46,10 @@ public class SQLUtil {
         return switch (expression) {
             case ConstantExpression<?> constantExpression -> Map.entry("?", List.of(constantExpression));
             case ColumnExpression<?> columnExpression -> Map.entry(columnExpression.column().name(), List.of());
+            case NotExpression notExpression -> {
+                Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(notExpression.expression());
+                yield Map.entry("(NOT (" + sql.getKey() + "))", sql.getValue());
+            }
             case LogicalExpression logicalExpression -> {
                 Expression a, b;
                 String operator;
@@ -80,6 +84,22 @@ public class SQLUtil {
                         b = right;
                         operator = "!=";
                     }
+                    case AndExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "AND";
+                    }
+                    case OrExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "OR";
+                    }
+                    case XorExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "XOR";
+                    }
+                    default -> throw new IllegalArgumentException("Unsupported logical expression type: " + expression.getClass().getName());
                 }
                 Map.Entry<String, List<ConstantExpression<?>>> aSql = buildSql(a);
                 Map.Entry<String, List<ConstantExpression<?>>> bSql = buildSql(b);
@@ -98,6 +118,10 @@ public class SQLUtil {
             case StringExpression stringExpression -> "'" + stringExpression.value().replaceAll("'", "''") + "'";
             case ConstantExpression<?> constantExpression -> String.valueOf(constantExpression.value());
             case ColumnExpression<?> columnExpression -> columnExpression.column().name();
+            case NotExpression notExpression -> {
+                String sql = buildSqlWithoutPlaceholders(notExpression.expression());
+                yield "(NOT (" + sql + "))";
+            }
             case LogicalExpression logicalExpression -> {
                 Expression a, b;
                 String operator;
@@ -132,6 +156,22 @@ public class SQLUtil {
                         b = right;
                         operator = "!=";
                     }
+                    case AndExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "AND";
+                    }
+                    case OrExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "OR";
+                    }
+                    case XorExpression(Expression left, Expression right) -> {
+                        a = left;
+                        b = right;
+                        operator = "XOR";
+                    }
+                    default -> throw new IllegalArgumentException("Unsupported logical expression type: " + expression.getClass().getName());
                 }
                 String aSql = buildSqlWithoutPlaceholders(a);
                 String bSql = buildSqlWithoutPlaceholders(b);
