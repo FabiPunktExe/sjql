@@ -1,10 +1,11 @@
 plugins {
     `java-library`
+    alias(libs.plugins.kotlin.jvm)
     `maven-publish`
 }
 
 group = "de.fabiexe"
-version = "0.2.2"
+version = "0.2.3"
 
 java {
     toolchain {
