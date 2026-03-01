@@ -8,6 +8,7 @@ import de.fabiexe.sjql.row.WritableRow;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -140,6 +141,16 @@ public class Table<T> {
      */
     public @NotNull Column<UUID> uuidColumn(@NotNull String name) {
         return column(new UUIDColumn(this, name));
+    }
+
+    /**
+     * Adds a timestamp column to this table.
+     *
+     * @param name The name of the column
+     * @return The added column
+     */
+    public @NotNull Column<Instant> timestampColumn(@NotNull String name) {
+        return column(new TimestampColumn(this, name));
     }
 
     /**

@@ -20,6 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public abstract class BasicDatabase implements Database {
     protected final DataSource dataSource;
@@ -134,6 +136,7 @@ public abstract class BasicDatabase implements Database {
 
             sql.append(") VALUES (");
 
+            List<ConstantExpression<?>> parameters = new ArrayList<>();
             first = true;
             for (Column<?> column : table.getColumns()) {
                 if (!row.contains(column)) {
@@ -144,20 +147,17 @@ public abstract class BasicDatabase implements Database {
                 } else {
                     sql.append(", ");
                 }
-                sql.append("?");
+                Expression expression = Objects.requireNonNull(row.get(column));
+                Map.Entry<String, List<ConstantExpression<?>>> sqlEntry = SQLUtil.buildSql(expression);
+                sql.append(sqlEntry.getKey());
+                parameters.addAll(sqlEntry.getValue());
             }
 
             sql.append(");");
 
             try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
-                int index = 1;
-                for (Column<?> column : table.getColumns()) {
-                    if (!row.contains(column)) {
-                        continue;
-                    }
-                    if (row.get(column) instanceof ConstantExpression<?> expression) {
-                        SQLUtil.setObject(statement, index++, expression);
-                    }
+                for (int i = 0; i < parameters.size(); i++) {
+                    SQLUtil.setObject(statement, i + 1, parameters.get(i));
                 }
                 statement.executeUpdate();
             }
@@ -183,6 +183,7 @@ public abstract class BasicDatabase implements Database {
             case FloatColumn _ -> "FLOAT";
             case BooleanColumn _ -> "BOOLEAN";
             case UUIDColumn _ -> "UUID";
+            case TimestampColumn _ -> "TIMESTAMP";
         };
     }
 }

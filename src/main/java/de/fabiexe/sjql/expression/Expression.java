@@ -7,6 +7,7 @@ import de.fabiexe.sjql.expression.dynamic.CurrentTimestampExpression;
 import de.fabiexe.sjql.expression.logical.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public interface Expression {
@@ -38,6 +39,10 @@ public interface Expression {
         return new UUIDExpression(value);
     }
 
+    static @NotNull Expression constant(@NotNull Instant value) {
+        return new TimestampExpression(value);
+    }
+
     static @NotNull Expression constant(@NotNull Object value) {
         return switch (value) {
             case Integer i -> new IntExpression(i);
@@ -47,6 +52,7 @@ public interface Expression {
             case Boolean b -> new BooleanExpression(b);
             case String s -> new StringExpression(s);
             case UUID u -> new UUIDExpression(u);
+            case Instant t -> new TimestampExpression(t);
             default -> throw new IllegalArgumentException("Unsupported constant value type: " + value.getClass().getName());
         };
     }

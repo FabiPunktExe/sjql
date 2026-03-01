@@ -4,6 +4,7 @@ import de.fabiexe.sjql.column.*;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.constant.*;
 import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
+import de.fabiexe.sjql.expression.dynamic.CurrentTimestampExpression;
 import de.fabiexe.sjql.expression.logical.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,7 @@ public class SQLUtil {
             case FloatExpression(Float value) -> statement.setObject(index, value, Types.FLOAT);
             case BooleanExpression(Boolean value) -> statement.setObject(index, value, Types.BOOLEAN);
             case UUIDExpression(UUID value) -> statement.setObject(index, value, Types.OTHER);
+            case TimestampExpression(Instant value) -> statement.setObject(index, value, Types.TIMESTAMP);
         }
     }
 
@@ -39,6 +42,7 @@ public class SQLUtil {
             case FloatColumn _ -> resultSet.getObject(index, Float.class);
             case BooleanColumn _ -> resultSet.getObject(index, Boolean.class);
             case UUIDColumn _ -> resultSet.getObject(index, UUID.class);
+            case TimestampColumn _ -> resultSet.getObject(index, Instant.class);
         };
     }
 
@@ -46,6 +50,7 @@ public class SQLUtil {
         return switch (expression) {
             case ConstantExpression<?> constantExpression -> Map.entry("?", List.of(constantExpression));
             case ColumnExpression<?> columnExpression -> Map.entry(columnExpression.column().name(), List.of());
+            case CurrentTimestampExpression _ -> Map.entry("CURRENT_TIMESTAMP", List.of());
             case NotExpression notExpression -> {
                 Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(notExpression.expression());
                 yield Map.entry("(NOT (" + sql.getKey() + "))", sql.getValue());
@@ -116,8 +121,11 @@ public class SQLUtil {
     public static @NotNull String buildSqlWithoutPlaceholders(@NotNull Expression expression) {
         return switch (expression) {
             case StringExpression stringExpression -> "'" + stringExpression.value().replaceAll("'", "''") + "'";
+            case UUIDExpression uuidExpression -> "'" + uuidExpression.value() + "'";
+            case TimestampExpression timestampExpression -> "'" + timestampExpression.value() + "'";
             case ConstantExpression<?> constantExpression -> String.valueOf(constantExpression.value());
             case ColumnExpression<?> columnExpression -> columnExpression.column().name();
+            case CurrentTimestampExpression _ -> "CURRENT_TIMESTAMP";
             case NotExpression notExpression -> {
                 String sql = buildSqlWithoutPlaceholders(notExpression.expression());
                 yield "(NOT (" + sql + "))";

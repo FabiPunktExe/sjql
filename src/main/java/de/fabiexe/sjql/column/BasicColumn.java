@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract sealed class BasicColumn<T> implements Column<T>
-        permits BooleanColumn, DoubleColumn, FloatColumn, IntColumn, LongColumn, StringColumn, UUIDColumn {
+        permits BooleanColumn, DoubleColumn, FloatColumn, IntColumn, LongColumn, StringColumn, UUIDColumn, TimestampColumn {
     protected final Table<?> table;
     protected final String name;
     protected final Class<T> type;

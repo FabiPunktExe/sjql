@@ -1,10 +1,7 @@
 package de.fabiexe.sjql.database;
 
 import de.fabiexe.sjql.Table;
-import de.fabiexe.sjql.column.Column;
-import de.fabiexe.sjql.column.IntColumn;
-import de.fabiexe.sjql.column.LongColumn;
-import de.fabiexe.sjql.column.UUIDColumn;
+import de.fabiexe.sjql.column.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,6 +43,7 @@ public class SQLiteDatabase extends BasicDatabase {
         return switch (column) {
             case IntColumn _, LongColumn _ -> "INTEGER";
             case UUIDColumn _ -> "TEXT";
+            case TimestampColumn _ -> "DATETIME";
             default -> super.getColumnType(column);
         };
     }
