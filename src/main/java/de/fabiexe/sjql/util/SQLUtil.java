@@ -30,6 +30,7 @@ public class SQLUtil {
             case BooleanExpression(Boolean value) -> statement.setObject(index, value, Types.BOOLEAN);
             case UUIDExpression(UUID value) -> statement.setObject(index, value, Types.OTHER);
             case TimestampExpression(Instant value) -> statement.setObject(index, value, Types.TIMESTAMP);
+            case NullExpression _ -> statement.setNull(index, Types.NULL);
         }
     }
 
@@ -123,6 +124,7 @@ public class SQLUtil {
             case StringExpression stringExpression -> "'" + stringExpression.value().replaceAll("'", "''") + "'";
             case UUIDExpression uuidExpression -> "'" + uuidExpression.value() + "'";
             case TimestampExpression timestampExpression -> "'" + timestampExpression.value() + "'";
+            case NullExpression _ -> "NULL";
             case ConstantExpression<?> constantExpression -> String.valueOf(constantExpression.value());
             case ColumnExpression<?> columnExpression -> columnExpression.column().name();
             case CurrentTimestampExpression _ -> "CURRENT_TIMESTAMP";

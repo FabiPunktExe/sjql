@@ -14,12 +14,16 @@ public sealed interface Column<T> permits BasicColumn {
     @NotNull Class<T> type();
     @Nullable Expression defaultValue();
     boolean isPrimaryKey();
+    boolean isNotNull();
 
     @Contract("_ -> this")
     @NotNull Column<T> defaultValue(@NotNull Expression defaultValue);
 
     @Contract("-> this")
-    @NotNull Column<T> primaryKey();
+    @NotNull Column<@NotNull T> primaryKey();
+
+    @Contract("-> this")
+    @NotNull Column<@NotNull T> notNull();
 
     @Contract("_ -> this")
     default @NotNull Column<T> defaultValue(@NotNull T defaultValue) {

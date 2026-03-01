@@ -1,5 +1,5 @@
 package de.fabiexe.sjql.expression.constant;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-public record DoubleExpression(@Nullable Double value) implements ConstantExpression<Double> {}
+public record DoubleExpression(@NotNull Double value) implements ConstantExpression<@NotNull Double> {}

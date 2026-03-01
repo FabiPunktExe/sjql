@@ -10,7 +10,7 @@ public interface WritableRow {
     <U> @Nullable Expression get(@NotNull Column<U> column);
     boolean contains(@NotNull Column<?> column);
 
-    default <U> void set(@NotNull Column<U> column, @NotNull U value) {
+    default <U> void set(@NotNull Column<U> column, @Nullable U value) {
         set(column, Expression.constant(value));
     }
 }

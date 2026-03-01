@@ -1,7 +1,7 @@
 package de.fabiexe.sjql.expression.constant;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
-public record TimestampExpression(@Nullable Instant value) implements ConstantExpression<Instant> {}
+public record TimestampExpression(@NotNull Instant value) implements ConstantExpression<@NotNull Instant> {}

@@ -1,5 +1,5 @@
 package de.fabiexe.sjql.expression.constant;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-public record LongExpression(@Nullable Long value) implements ConstantExpression<Long> {}
+public record LongExpression(@NotNull Long value) implements ConstantExpression<@NotNull Long> {}

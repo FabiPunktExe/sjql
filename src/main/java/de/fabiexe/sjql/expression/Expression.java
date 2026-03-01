@@ -6,6 +6,7 @@ import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
 import de.fabiexe.sjql.expression.dynamic.CurrentTimestampExpression;
 import de.fabiexe.sjql.expression.logical.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -31,30 +32,46 @@ public interface Expression {
         return new BooleanExpression(value);
     }
 
-    static @NotNull Expression constant(@NotNull String value) {
-        return new StringExpression(value);
+    static @NotNull Expression constant(@Nullable String value) {
+        if (value == null) {
+            return new NullExpression();
+        } else {
+            return new StringExpression(value);
+        }
     }
 
-    static @NotNull Expression constant(@NotNull UUID value) {
-        return new UUIDExpression(value);
+    static @NotNull Expression constant(@Nullable UUID value) {
+        if (value == null) {
+            return new NullExpression();
+        } else {
+            return new UUIDExpression(value);
+        }
     }
 
-    static @NotNull Expression constant(@NotNull Instant value) {
-        return new TimestampExpression(value);
+    static @NotNull Expression constant(@Nullable Instant value) {
+        if (value == null) {
+            return new NullExpression();
+        } else {
+            return new TimestampExpression(value);
+        }
     }
 
-    static @NotNull Expression constant(@NotNull Object value) {
-        return switch (value) {
-            case Integer i -> new IntExpression(i);
-            case Long l -> new LongExpression(l);
-            case Float f -> new FloatExpression(f);
-            case Double d -> new DoubleExpression(d);
-            case Boolean b -> new BooleanExpression(b);
-            case String s -> new StringExpression(s);
-            case UUID u -> new UUIDExpression(u);
-            case Instant t -> new TimestampExpression(t);
-            default -> throw new IllegalArgumentException("Unsupported constant value type: " + value.getClass().getName());
-        };
+    static @NotNull Expression constant(@Nullable Object value) {
+        if (value == null) {
+            return new NullExpression();
+        } else {
+            return switch (value) {
+                case Integer i -> new IntExpression(i);
+                case Long l -> new LongExpression(l);
+                case Float f -> new FloatExpression(f);
+                case Double d -> new DoubleExpression(d);
+                case Boolean b -> new BooleanExpression(b);
+                case String s -> new StringExpression(s);
+                case UUID u -> new UUIDExpression(u);
+                case Instant t -> new TimestampExpression(t);
+                default -> throw new IllegalArgumentException("Unsupported constant value type: " + value.getClass().getName());
+            };
+        }
     }
 
     static @NotNull Expression column(@NotNull Column<?> column) {

@@ -5,6 +5,7 @@ import de.fabiexe.sjql.UpdateStatement;
 import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
+import de.fabiexe.sjql.expression.constant.NullExpression;
 import de.fabiexe.sjql.row.BasicWritableRow;
 import de.fabiexe.sjql.row.WritableRow;
 import de.fabiexe.sjql.util.SQLUtil;
@@ -61,6 +62,12 @@ public class BasicUpdateStatement<T> implements UpdateStatement {
             if (!row.contains(column)) {
                 continue;
             }
+
+            Expression value = row.get(column);
+            if (column.isNotNull() && value instanceof NullExpression) {
+                throw new IllegalArgumentException("Column " + column.name() + " is NOT NULL but set to null");
+            }
+
             if (first) {
                 first = false;
             } else {

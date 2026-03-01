@@ -6,6 +6,7 @@ import de.fabiexe.sjql.row.ConstructorRowMapper;
 import de.fabiexe.sjql.row.ReadableRow;
 import de.fabiexe.sjql.row.WritableRow;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -78,7 +79,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<Integer> intColumn(@NotNull String name) {
+    public @NotNull Column<@Nullable Integer> intColumn(@NotNull String name) {
         return column(new IntColumn(this, name));
     }
 
@@ -88,7 +89,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<Double> doubleColumn(@NotNull String name) {
+    public @NotNull Column<@Nullable Double> doubleColumn(@NotNull String name) {
         return column(new DoubleColumn(this, name));
     }
 
@@ -99,7 +100,7 @@ public class Table<T> {
      * @param length The maximum length of the string
      * @return The added column
      */
-    public @NotNull Column<String> stringColumn(@NotNull String name, int length) {
+    public @NotNull Column<@Nullable String> stringColumn(@NotNull String name, int length) {
         return column(new StringColumn(this, name, length));
     }
 
@@ -109,7 +110,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<Long> longColumn(@NotNull String name) {
+    public @NotNull Column<@Nullable Long> longColumn(@NotNull String name) {
         return column(new LongColumn(this, name));
     }
 
@@ -119,7 +120,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<Float> floatColumn(@NotNull String name) {
+    public @NotNull Column<@Nullable Float> floatColumn(@NotNull String name) {
         return column(new FloatColumn(this, name));
     }
 
@@ -129,7 +130,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<Boolean> booleanColumn(@NotNull String name) {
+    public @NotNull Column<@Nullable Boolean> booleanColumn(@NotNull String name) {
         return column(new BooleanColumn(this, name));
     }
 
@@ -139,7 +140,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<UUID> uuidColumn(@NotNull String name) {
+    public @NotNull Column<@Nullable UUID> uuidColumn(@NotNull String name) {
         return column(new UUIDColumn(this, name));
     }
 
@@ -149,7 +150,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<Instant> timestampColumn(@NotNull String name) {
+    public @NotNull Column<@Nullable Instant> timestampColumn(@NotNull String name) {
         return column(new TimestampColumn(this, name));
     }
 

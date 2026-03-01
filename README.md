@@ -11,7 +11,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("de.fabiexe:sjql:0.3.1")
+    implementation("de.fabiexe:sjql:0.4.0")
 }
 ```
 
@@ -30,7 +30,7 @@ dependencies {
     <dependency>
         <groupId>de.fabiexe</groupId>
         <artifactId>sjql</artifactId>
-        <version>0.3.1</version>
+        <version>0.4.0</version>
     </dependency>
 </dependencies>
 ```
@@ -39,10 +39,11 @@ dependencies {
 
 ### Example table:
 ```java
-public record Coffee(String name, double price) {
+public record Coffee(String name, double price, String description) {
     public static final Table<Coffee> TABLE = new Table<>("coffee", Coffee.class);
     public static final Column<String> NAME = TABLE.stringColumn("name", 64).primaryKey();
-    public static final Column<Double> PRICE = TABLE.doubleColumn("price").defaultValue(4.5);
+    public static final Column<Double> PRICE = TABLE.doubleColumn("price").defaultValue(4.5).notNull();
+    public static final Column<String> DESCRIPTION = TABLE.stringColumn("description", 256);
 }
 ```
 

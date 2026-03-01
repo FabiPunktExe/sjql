@@ -12,6 +12,7 @@ public abstract sealed class BasicColumn<T> implements Column<T>
     protected final Class<T> type;
     protected Expression defaultValue = null;
     protected boolean isPrimaryKey = false;
+    protected boolean notNull = false;
 
     public BasicColumn(
             @NotNull Table<?> table,
@@ -49,14 +50,26 @@ public abstract sealed class BasicColumn<T> implements Column<T>
     }
 
     @Override
+    public boolean isNotNull() {
+        return notNull;
+    }
+
+    @Override
     public @NotNull BasicColumn<T> defaultValue(@NotNull Expression defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
 
     @Override
-    public @NotNull BasicColumn<T> primaryKey() {
-        this.isPrimaryKey = true;
+    public @NotNull BasicColumn<@NotNull T> primaryKey() {
+        isPrimaryKey = true;
+        notNull = true;
+        return this;
+    }
+
+    @Override
+    public @NotNull BasicColumn<@NotNull T> notNull() {
+        notNull = true;
         return this;
     }
 }

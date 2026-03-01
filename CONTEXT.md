@@ -48,13 +48,11 @@ Tables are typically defined as static constants within a Java class or record.
 - Support for `where()` clauses using expressions (e.g., `Column.eq(value)`, `Column.gt(value)`).
 
 ### 4. Primary Keys & Defaults
-- Use `.primaryKey()` to mark columns as primary keys.
-- Dialect-specific auto-generation for PKs:
-  - PostgreSQL: `SERIAL` (int), `BIGSERIAL` (long), `UUID DEFAULT gen_random_uuid()` (uuid)
-  - H2: `INT AUTO_INCREMENT` (int), `BIGINT AUTO_INCREMENT` (long), `UUID DEFAULT RANDOM_UUID()` (uuid)
-  - SQLite: `INTEGER PRIMARY KEY` (int/long via RowID)
-- Default values can be set via `.defaultValue(value)` or `.defaultValue(expression)`.
-- During inserts, columns may be omitted if they have a default value or are auto-generated.
+- Use `.primaryKey()` to mark columns as primary keys. Primary keys are implicitly NOT NULL.
+- Use `.notNull()` to mark columns as NOT NULL.
+- During inserts, columns may be omitted if they have a default value, are auto-generated, or are nullable (not marked as NOT NULL).
+- SQL generation for `createTable` includes `NOT NULL` constraints for relevant columns.
+- `insert` and `update` operations validate that `NOT NULL` columns are not set to `null`.
 
 ## Architecture Details
 
