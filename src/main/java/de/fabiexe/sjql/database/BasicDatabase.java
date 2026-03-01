@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BasicDatabase implements Database {
@@ -42,25 +43,41 @@ public abstract class BasicDatabase implements Database {
                     .append(" (");
 
             List<Column<?>> columns = table.getColumns();
+            List<Column<?>> primaryKeys = new ArrayList<>();
             for (int i = 0; i < columns.size(); i++) {
                 Column<?> column = columns.get(i);
                 sql.append(column.name()).append(' ').append(getColumnType(column));
+
                 if (column.isPrimaryKey()) {
-                    sql.append(" PRIMARY KEY");
-                    String primaryKeyAddition = getPrimaryKeyAddition(column);
-                    if (primaryKeyAddition != null) {
-                        sql.append(' ').append(primaryKeyAddition);
-                    }
-                } else {
-                    Expression defaultValue = column.defaultValue();
-                    if (defaultValue != null) {
-                        sql.append(" DEFAULT ").append(SQLUtil.buildSqlWithoutPlaceholders(defaultValue));
-                    }
+                    primaryKeys.add(column);
                 }
+
+                String primaryKeyAddition = getPrimaryKeyAddition(column);
+                if (primaryKeyAddition != null) {
+                    sql.append(' ').append(primaryKeyAddition);
+                }
+
+                Expression defaultValue = column.defaultValue();
+                if (defaultValue != null) {
+                    sql.append(" DEFAULT ").append(SQLUtil.buildSqlWithoutPlaceholders(defaultValue));
+                }
+
                 if (i < columns.size() - 1) {
                     sql.append(", ");
                 }
             }
+
+            if (!primaryKeys.isEmpty()) {
+                sql.append(", PRIMARY KEY (");
+                for (int i = 0; i < primaryKeys.size(); i++) {
+                    sql.append(primaryKeys.get(i).name());
+                    if (i < primaryKeys.size() - 1) {
+                        sql.append(", ");
+                    }
+                }
+                sql.append(")");
+            }
+
             sql.append(");");
 
             try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {

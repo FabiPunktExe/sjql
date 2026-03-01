@@ -28,7 +28,6 @@ public class SQLiteDatabase extends BasicDatabase {
     @Override
     protected @Nullable String getPrimaryKeyAddition(@NotNull Column<?> column) {
         return switch (column) {
-            case IntColumn _, LongColumn _ when column.isPrimaryKey() -> "AUTOINCREMENT";
             case UUIDColumn _ when column.isPrimaryKey() -> """
                     DEFAULT (
                         lower(hex(randomblob(4))) || '-' ||
@@ -38,7 +37,7 @@ public class SQLiteDatabase extends BasicDatabase {
                         substr(lower(hex(randomblob(2))),2) || '-' ||
                         lower(hex(randomblob(6)))
                     )""";
-            default -> super.getColumnType(column);
+            default -> null;
         };
     }
 

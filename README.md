@@ -1,17 +1,26 @@
 # SJQL (Simple Java Query Library)
 
 ## Example
+
+### Example table:
 ```java
-public record Coffee(
-        @NotNull String name,
-        double price
-) {
+public record Coffee(String name, double price) {
     public static final Table<Coffee> TABLE = new Table<>("coffee", Coffee.class);
     public static final Column<String> NAME = TABLE.stringColumn("name", 64).primaryKey();
     public static final Column<Double> PRICE = TABLE.doubleColumn("price").defaultValue(4.5);
 }
 ```
 
+### Example table (multiple primary keys):
+```java
+public record UserRole(String username, String role) {
+    public static final Table<UserRole> TABLE = new Table<>("user_roles", UserRole.class);
+    public static final Column<String> USERNAME = TABLE.stringColumn("username", 64).primaryKey();
+    public static final Column<String> ROLE = TABLE.stringColumn("role", 64).primaryKey();
+}
+```
+
+### Let's use our tables
 ```java
 public void example() throws SQLException {
     Database database = Database.create(dataSource);

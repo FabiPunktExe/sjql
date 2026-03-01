@@ -28,17 +28,9 @@ public class H2Database extends BasicDatabase {
     @Override
     protected @Nullable String getPrimaryKeyAddition(@NotNull Column<?> column) {
         return switch (column) {
-            case IntColumn _ when column.isPrimaryKey() -> "AUTO_INCREMENT";
-            case LongColumn _ when column.isPrimaryKey() -> "AUTO_INCREMENT";
+            case IntColumn _, LongColumn _ when column.isPrimaryKey() -> "AUTO_INCREMENT";
+            case UUIDColumn _ when column.isPrimaryKey() -> "DEFAULT RANDOM_UUID()";
             default -> null;
-        };
-    }
-
-    @Override
-    protected @NotNull String getColumnType(Column<?> column) {
-        return switch (column) {
-            case UUIDColumn _ when column.isPrimaryKey() -> "UUID DEFAULT RANDOM_UUID()";
-            default -> super.getColumnType(column);
         };
     }
 
