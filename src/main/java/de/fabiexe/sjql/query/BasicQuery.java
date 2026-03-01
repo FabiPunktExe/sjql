@@ -2,7 +2,6 @@ package de.fabiexe.sjql.query;
 
 import de.fabiexe.sjql.Query;
 import de.fabiexe.sjql.Table;
-import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.util.ThrowingSupplier;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,7 @@ public abstract class BasicQuery<T, U> implements Query<U> {
     protected final Table<T> table;
     protected final ThrowingSupplier<Connection, SQLException> connectionSupplier;
     protected Expression condition = null;
-    protected List<Map.Entry<Column<?>, Boolean>> ordering = new ArrayList<>();
+    protected List<Map.Entry<Expression, Boolean>> ordering = new ArrayList<>();
     protected Long limit = null;
 
     public BasicQuery(@NotNull Table<T> table, @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier) {
@@ -33,13 +32,13 @@ public abstract class BasicQuery<T, U> implements Query<U> {
     }
 
     @Override
-    public @NotNull Query<U> orderBy(@NotNull Column<?> column, boolean ascending) {
-        this.ordering.add(Map.entry(column, ascending));
+    public @NotNull Query<U> orderBy(@NotNull Expression expression, boolean ascending) {
+        this.ordering.add(Map.entry(expression, ascending));
         return this;
     }
 
     @Override
-    public @NotNull Query<U> orderBy(@NotNull List<Map.Entry<Column<?>, Boolean>> ordering) {
+    public @NotNull Query<U> orderBy(@NotNull List<Map.Entry<Expression, Boolean>> ordering) {
         this.ordering.addAll(ordering);
         return this;
     }

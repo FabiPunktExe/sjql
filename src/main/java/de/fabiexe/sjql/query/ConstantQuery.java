@@ -1,7 +1,6 @@
 package de.fabiexe.sjql.query;
 
 import de.fabiexe.sjql.Query;
-import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.expression.Expression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,12 +15,12 @@ public record ConstantQuery<T>(@Nullable T value) implements Query<T> {
     }
 
     @Override
-    public @NotNull Query<T> orderBy(@NotNull Column<?> column, boolean ascending) {
+    public @NotNull Query<T> orderBy(@NotNull Expression expression, boolean ascending) {
         return this;
     }
 
     @Override
-    public @NotNull Query<T> orderBy(@NotNull List<Map.Entry<Column<?>, Boolean>> ordering) {
+    public @NotNull Query<T> orderBy(@NotNull List<Map.Entry<Expression, Boolean>> ordering) {
         return this;
     }
 

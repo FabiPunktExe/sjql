@@ -2,6 +2,7 @@ package de.fabiexe.sjql.query;
 
 import de.fabiexe.sjql.Table;
 import de.fabiexe.sjql.column.Column;
+import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
 import de.fabiexe.sjql.row.BasicReadableRow;
 import de.fabiexe.sjql.row.ReadableRow;
@@ -60,8 +61,10 @@ public class BasicRowQuery<T> extends BasicQuery<T, List<ReadableRow<T>>> {
         if (!ordering.isEmpty()) {
             sql.append(" ORDER BY ");
             for (int i = 0; i < ordering.size(); i++) {
-                Map.Entry<Column<?>, Boolean> entry = ordering.get(i);
-                sql.append(entry.getKey().name()).append(entry.getValue() ? " ASC" : " DESC");
+                Map.Entry<Expression, Boolean> entry = ordering.get(i);
+                Map.Entry<String, List<ConstantExpression<?>>> orderSql = SQLUtil.buildSql(entry.getKey());
+                sql.append(orderSql.getKey()).append(entry.getValue() ? " ASC" : " DESC");
+                parameters.addAll(orderSql.getValue());
                 if (i < ordering.size() - 1) {
                     sql.append(", ");
                 }
