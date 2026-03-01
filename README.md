@@ -1,5 +1,40 @@
 # SJQL (Simple Java Query Library)
 
+## How to use
+
+### Gradle
+```kotlin
+repositories {
+    maven("https://repo.diruptio.de/repository/maven-public")
+}
+```
+
+```kotlin
+dependencies {
+    implementation("de.fabiexe:sjql:0.3.1")
+}
+```
+
+### Maven
+```xml
+<repositories>
+    <repository>
+        <id>diruptio-maven-public</id>
+        <url>https://repo.diruptio.de/repository/maven-public</url>
+    </repository>
+</repositories>
+```
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>de.fabiexe</groupId>
+        <artifactId>sjql</artifactId>
+        <version>0.3.1</version>
+    </dependency>
+</dependencies>
+```
+
 ## Example
 
 ### Example table:
