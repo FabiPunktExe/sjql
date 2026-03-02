@@ -42,16 +42,16 @@ public sealed interface Column<T> permits BasicColumn {
         return eq(Expression.constant(value));
     }
 
-    default @NotNull Expression ne(@NotNull Expression value) {
+    default @NotNull Expression neq(@NotNull Expression value) {
         return new NotEqualsExpression(new ColumnExpression<>(this), value);
     }
 
-    default @NotNull Expression ne(@NotNull Column<? extends T> other) {
-        return ne(new ColumnExpression<>(other));
+    default @NotNull Expression neq(@NotNull Column<? extends T> other) {
+        return neq(new ColumnExpression<>(other));
     }
 
-    default @NotNull Expression ne(@NotNull T value) {
-        return ne(Expression.constant(value));
+    default @NotNull Expression neq(@NotNull T value) {
+        return neq(Expression.constant(value));
     }
 
     default @NotNull Expression gt(@NotNull Expression value) {

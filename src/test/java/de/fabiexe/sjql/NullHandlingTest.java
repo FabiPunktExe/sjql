@@ -21,7 +21,7 @@ public class NullHandlingTest {
     private DataSource dataSource;
 
     public record TestRecord(int id, @NotNull String name, @Nullable String description) {
-        public static final Table<TestRecord> TABLE = new Table<>("test_nulls", TestRecord.class);
+        public static final Table<TestRecord> TABLE = new Table<>(TestRecord.class, "test_nulls");
         public static final Column<@NotNull Integer> ID = TABLE.intColumn("id").primaryKey();
         public static final Column<@NotNull String> NAME = TABLE.stringColumn("name", 64).notNull();
         public static final Column<@Nullable String> DESCRIPTION = TABLE.stringColumn("description", 64);

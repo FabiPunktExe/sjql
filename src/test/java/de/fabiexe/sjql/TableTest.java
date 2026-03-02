@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class TableTest {
     @Test
     public void test() {
-        Table<Coffee> table = new Table<>("coffee", Coffee.class);
+        Table<Coffee> table = new Table<>(Coffee.class, "coffee");
 
         table.stringColumn("name", 64);
         assertThrows(IllegalArgumentException.class, table::getRowMapper);

@@ -27,7 +27,7 @@ public class TypesTest {
             UUID uuidVal,
             Instant timestampVal
     ) {
-        public static final Table<AllTypes> TABLE = new Table<>("all_types", AllTypes.class);
+        public static final Table<AllTypes> TABLE = new Table<>(AllTypes.class, "all_types");
         public static final Column<Integer> INT = TABLE.intColumn("int_val");
         public static final Column<Long> LONG = TABLE.longColumn("long_val");
         public static final Column<Float> FLOAT = TABLE.floatColumn("float_val");

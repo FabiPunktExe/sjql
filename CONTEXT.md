@@ -12,13 +12,13 @@ SJQL is a lightweight, type-safe Java library for interacting with SQL databases
 
 ### 1. Table Definitions
 Tables are typically defined as static constants within a Java class or record.
-- Use `new Table<>("table_name", Record.class)` to define a table.
+- Use `new Table<>(Record.class, "table_name")` to define a table.
 - Define columns using methods like `table.stringColumn("name", length)`, `table.intColumn("name")`, `table.timestampColumn("name")`, etc.
 - Mark one or multiple columns as primary key using `.primaryKey()`.
 - Example:
   ```java
   public record User(String name, int age) {
-      public static final Table<User> TABLE = new Table<>("users", User.class);
+      public static final Table<User> TABLE = new Table<>(User.class, "users");
       public static final Column<String> NAME = TABLE.stringColumn("name", 64).primaryKey();
       public static final Column<Integer> AGE = TABLE.intColumn("age");
   }
@@ -26,7 +26,7 @@ Tables are typically defined as static constants within a Java class or record.
 - Example (multiple primary keys):
   ```java
   public record UserRole(String username, String role) {
-      public static final Table<UserRole> TABLE = new Table<>("user_roles", UserRole.class);
+      public static final Table<UserRole> TABLE = new Table<>(UserRole.class, "user_roles");
       public static final Column<String> USERNAME = TABLE.stringColumn("username", 64).primaryKey();
       public static final Column<String> ROLE = TABLE.stringColumn("role", 64).primaryKey();
   }

@@ -22,8 +22,8 @@ import java.util.function.Function;
  * @param <T> The type of the objects that represent rows in this table.
  */
 public class Table<T> {
-    private final String name;
     private final Class<T> type;
+    private final String name;
     private final List<Column<?>> columns = new ArrayList<>();
     private Function<ReadableRow<T>, T> rowMapper;
 
@@ -36,12 +36,12 @@ public class Table<T> {
      *                  If {@code null}, a default constructor-based mapper will be used.
      */
     public Table(
-            @NotNull String name,
             @NotNull Class<T> type,
+            @NotNull String name,
             @NotNull Function<ReadableRow<T>, T> rowMapper
     ) {
-        this.name = name;
         this.type = type;
+        this.name = name;
         this.rowMapper = rowMapper;
     }
 
@@ -52,11 +52,11 @@ public class Table<T> {
      * @param type The class of the objects that represent rows in this table
      */
     public Table(
-            @NotNull String name,
-            @NotNull Class<T> type
+            @NotNull Class<T> type,
+            @NotNull String name
     ) {
-        this.name = name;
         this.type = type;
+        this.name = name;
         this.rowMapper = null;
     }
 
@@ -275,21 +275,21 @@ public class Table<T> {
     }
 
     /**
-     * Gets the name of this table.
-     *
-     * @return The name of this table
-     */
-    public @NotNull String getName() {
-        return name;
-    }
-
-    /**
      * Gets the class of the objects that represent rows in this table.
      *
      * @return The class of the objects that represent rows in this table
      */
     public @NotNull Class<T> getType() {
         return type;
+    }
+
+    /**
+     * Gets the name of this table.
+     *
+     * @return The name of this table
+     */
+    public @NotNull String getName() {
+        return name;
     }
 
     /**

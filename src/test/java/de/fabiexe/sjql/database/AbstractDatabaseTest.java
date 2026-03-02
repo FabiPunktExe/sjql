@@ -120,7 +120,7 @@ public abstract class AbstractDatabaseTest {
 
         // !=
         coffees = database.throwingTransaction(() -> Coffee.TABLE.select()
-                .where(Coffee.PRICE.ne(2.5))
+                .where(Coffee.PRICE.neq(2.5))
                 .execute());
         assertEquals(List.of(new Coffee("Latte", 3.5)), coffees);
 

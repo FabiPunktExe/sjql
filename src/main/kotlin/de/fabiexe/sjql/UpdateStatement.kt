@@ -1,5 +1,5 @@
-package de.fabiexe.sjql.expression
+package de.fabiexe.sjql
 
-import de.fabiexe.sjql.UpdateStatement
+import de.fabiexe.sjql.expression.Expression
 
 infix fun UpdateStatement.where(condition: Expression): UpdateStatement = where(condition)

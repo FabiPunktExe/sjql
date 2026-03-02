@@ -1,7 +1,7 @@
-package de.fabiexe.sjql.expression
+package de.fabiexe.sjql
 
-import de.fabiexe.sjql.Query
 import de.fabiexe.sjql.column.Column
+import de.fabiexe.sjql.expression.Expression
 
 infix fun <T> Query<T>.where(condition: Expression): Query<T> = where(condition)
 fun <T> Query<T>.orderBy(expression: Expression, ascending: Boolean = true): Query<T> = orderBy(expression, ascending)
