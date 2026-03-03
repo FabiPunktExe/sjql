@@ -8,20 +8,76 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Represents a column in a {@link Table}.
+ *
+ * @param <T> the type of the column
+ */
 public sealed interface Column<T> permits BasicColumn {
+    /**
+     * Gets the table this column belongs to.
+     *
+     * @return The table
+     */
     @NotNull Table<?> table();
+
+    /**
+     * Gets the name of the column.
+     *
+     * @return The name
+     */
     @NotNull String name();
+
+    /**
+     * Gets the type of the column.
+     *
+     * @return The type
+     */
     @NotNull Class<T> type();
+
+    /**
+     * Gets the default value of the column
+     *
+     * @return The default value, or {@code null} if none is set
+     */
     @Nullable Expression defaultValue();
+
+    /**
+     * Checks if the column is a primary key.
+     *
+     * @return {@code true} if the column is a primary key, otherwise {@code false}
+     */
     boolean isPrimaryKey();
+
+    /**
+     * Checks if the column has a not-null constraint.
+     *
+     * @return {@code true} if the column has a not-null constraint, otherwise {@code false}
+     */
     boolean isNotNull();
 
+    /**
+     * Sets the default value of the column.
+     *
+     * @param defaultValue The default value to set
+     * @return This column for chaining
+     */
     @Contract("_ -> this")
     @NotNull Column<T> defaultValue(@NotNull Expression defaultValue);
 
+    /**
+     * Sets this column as a primary key.
+     *
+     * @return This column for chaining
+     */
     @Contract("-> this")
     @NotNull Column<@NotNull T> primaryKey();
 
+    /**
+     * Sets a not-null constraint on this column.
+     *
+     * @return This column for chaining
+     */
     @Contract("-> this")
     @NotNull Column<@NotNull T> notNull();
 
