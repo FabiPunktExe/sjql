@@ -194,6 +194,7 @@ public abstract class BasicDatabase implements Database {
             case BooleanColumn _ -> "BOOLEAN";
             case UUIDColumn _ -> "UUID";
             case TimestampColumn _ -> "TIMESTAMP";
+            case ComplexColumn<?, ?> complexColumn -> getColumnType(complexColumn.getBase());
         };
     }
 }

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> the type of the column
  */
-public sealed interface Column<T> permits BasicColumn {
+public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
     /**
      * Gets the table this column belongs to.
      *
@@ -43,20 +43,6 @@ public sealed interface Column<T> permits BasicColumn {
     @Nullable Expression defaultValue();
 
     /**
-     * Checks if the column is a primary key.
-     *
-     * @return {@code true} if the column is a primary key, otherwise {@code false}
-     */
-    boolean isPrimaryKey();
-
-    /**
-     * Checks if the column has a not-null constraint.
-     *
-     * @return {@code true} if the column has a not-null constraint, otherwise {@code false}
-     */
-    boolean isNotNull();
-
-    /**
      * Sets the default value of the column.
      *
      * @param defaultValue The default value to set
@@ -66,12 +52,26 @@ public sealed interface Column<T> permits BasicColumn {
     @NotNull Column<T> defaultValue(@NotNull Expression defaultValue);
 
     /**
+     * Checks if the column is a primary key.
+     *
+     * @return {@code true} if the column is a primary key, otherwise {@code false}
+     */
+    boolean isPrimaryKey();
+
+    /**
      * Sets this column as a primary key.
      *
      * @return This column for chaining
      */
     @Contract("-> this")
     @NotNull Column<@NotNull T> primaryKey();
+
+    /**
+     * Checks if the column has a not-null constraint.
+     *
+     * @return {@code true} if the column has a not-null constraint, otherwise {@code false}
+     */
+    boolean isNotNull();
 
     /**
      * Sets a not-null constraint on this column.

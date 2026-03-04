@@ -3,6 +3,7 @@ package de.fabiexe.sjql;
 import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.database.H2Database;
 import de.fabiexe.sjql.expression.Expression;
+import kotlin.time.Clock;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,9 @@ public class TypesTest {
             boolean boolVal,
             String stringVal,
             UUID uuidVal,
-            Instant timestampVal
+            Instant timestampVal,
+            kotlin.uuid.Uuid kotlinUuidVal,
+            kotlin.time.Instant kotlinInstantVal
     ) {
         public static final Table<AllTypes> TABLE = new Table<>(AllTypes.class, "all_types");
         public static final Column<Integer> INT = TABLE.intColumn("int_val");
@@ -36,6 +39,8 @@ public class TypesTest {
         public static final Column<String> STRING = TABLE.stringColumn("string_val", 255);
         public static final Column<UUID> UUID = TABLE.uuidColumn("uuid_val");
         public static final Column<Instant> TIMESTAMP = TABLE.timestampColumn("timestamp_val");
+        public static final Column<kotlin.uuid.Uuid> KOTLIN_UUID = TableKt.kUuidColumn(TABLE, "kotlin_uuid_val");
+        public static final Column<kotlin.time.Instant> KOTLIN_INSTANT = TableKt.kTimestampColumn(TABLE, "kotlin_instant_val");
     }
 
     private static Database database;
@@ -50,9 +55,19 @@ public class TypesTest {
 
     @Test
     void testInsertAndSelect() throws SQLException {
-        UUID uuid = UUID.randomUUID();
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        AllTypes item = new AllTypes(42, 123456789L, 3.14f, 2.71828, true, "Hello World", uuid, now);
+        AllTypes item = new AllTypes(
+                42,
+                123456789L,
+                3.14f,
+                2.71828,
+                true,
+                "Hello World",
+                UUID.randomUUID(),
+                now,
+                kotlin.uuid.Uuid.Companion.random(),
+                kotlin.time.jdk8.InstantConversionsJDK8Kt.toKotlinInstant(now)
+        );
 
         database.throwingTransaction(() -> {
             AllTypes.TABLE.insert(row -> {
@@ -64,6 +79,8 @@ public class TypesTest {
                 row.set(AllTypes.BOOL, item.boolVal());
                 row.set(AllTypes.UUID, item.uuidVal());
                 row.set(AllTypes.TIMESTAMP, item.timestampVal());
+                row.set(AllTypes.KOTLIN_UUID, item.kotlinUuidVal());
+                row.set(AllTypes.KOTLIN_INSTANT, item.kotlinInstantVal());
             });
 
             List<AllTypes> result = AllTypes.TABLE.select().execute();
@@ -78,6 +95,8 @@ public class TypesTest {
             assertEquals(item.stringVal(), allTypes.stringVal());
             assertEquals(item.uuidVal(), allTypes.uuidVal());
             assertEquals(item.timestampVal(), allTypes.timestampVal());
+            assertEquals(item.kotlinUuidVal(), allTypes.kotlinUuidVal());
+            assertEquals(item.kotlinInstantVal(), allTypes.kotlinInstantVal());
         });
     }
 
@@ -93,6 +112,8 @@ public class TypesTest {
                 row.set(AllTypes.BOOL, true);
                 row.set(AllTypes.UUID, UUID.randomUUID());
                 row.set(AllTypes.TIMESTAMP, Expression.currentTimestamp());
+                row.set(AllTypes.KOTLIN_UUID, kotlin.uuid.Uuid.Companion.random());
+                row.set(AllTypes.KOTLIN_INSTANT, Clock.System.INSTANCE.now());
             });
 
             List<AllTypes> result = AllTypes.TABLE.select().execute();

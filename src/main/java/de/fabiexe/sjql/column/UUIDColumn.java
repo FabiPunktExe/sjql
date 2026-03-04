@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public final class UUIDColumn extends BasicColumn<UUID> {
+public final class UUIDColumn extends PrimitiveColumn<UUID> {
     public UUIDColumn(@NotNull Table<?> table, @NotNull String name) {
         super(table, name, UUID.class);
     }

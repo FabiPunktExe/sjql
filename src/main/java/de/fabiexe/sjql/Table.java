@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * This class represents a database table. It provides methods to define columns, insert data, and perform queries.
@@ -66,8 +67,12 @@ public class Table<T> {
      * @param <U> The type of the column
      * @param column The column to add
      * @return The added column
+     * @throws IllegalArgumentException If a column with the same name already exists in this table
      */
     public <U> @NotNull Column<U> column(@NotNull Column<U> column) {
+        if (columns.stream().map(Column::name).anyMatch(Predicate.isEqual(column.name()))) {
+            throw new IllegalArgumentException("Column " + column.name() + " already exists in table " + name);
+        }
         columns.add(column);
         rowMapper = null;
         return column;

@@ -5,6 +5,7 @@ import de.fabiexe.sjql.expression.constant.*;
 import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
 import de.fabiexe.sjql.expression.dynamic.CurrentTimestampExpression;
 import de.fabiexe.sjql.expression.logical.*;
+import kotlin.uuid.UuidKt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,11 +49,27 @@ public interface Expression {
         }
     }
 
+    static @NotNull Expression constant(@Nullable kotlin.uuid.Uuid value) {
+        if (value == null) {
+            return new NullExpression();
+        } else {
+            return new UUIDExpression(UuidKt.toJavaUuid(value));
+        }
+    }
+
     static @NotNull Expression constant(@Nullable Instant value) {
         if (value == null) {
             return new NullExpression();
         } else {
             return new TimestampExpression(value);
+        }
+    }
+
+    static @NotNull Expression constant(@Nullable kotlin.time.Instant value) {
+        if (value == null) {
+            return new NullExpression();
+        } else {
+            return new TimestampExpression(kotlin.time.jdk8.InstantConversionsJDK8Kt.toJavaInstant(value));
         }
     }
 
@@ -68,7 +85,9 @@ public interface Expression {
                 case Boolean b -> new BooleanExpression(b);
                 case String s -> new StringExpression(s);
                 case UUID u -> new UUIDExpression(u);
+                case kotlin.uuid.Uuid u -> new UUIDExpression(UuidKt.toJavaUuid(u));
                 case Instant t -> new TimestampExpression(t);
+                case kotlin.time.Instant t -> new TimestampExpression(kotlin.time.jdk8.InstantConversionsJDK8Kt.toJavaInstant(t));
                 default -> throw new IllegalArgumentException("Unsupported constant value type: " + value.getClass().getName());
             };
         }

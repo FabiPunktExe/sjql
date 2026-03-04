@@ -34,6 +34,7 @@ public class SQLUtil {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> @Nullable T getObject(@NotNull ResultSet resultSet, int index, @NotNull Column<T> column) throws SQLException {
         return (T) switch (column) {
             case IntColumn _ -> resultSet.getObject(index, Integer.class);
@@ -44,6 +45,11 @@ public class SQLUtil {
             case BooleanColumn _ -> resultSet.getObject(index, Boolean.class);
             case UUIDColumn _ -> resultSet.getObject(index, UUID.class);
             case TimestampColumn _ -> resultSet.getObject(index, Instant.class);
+            case ComplexColumn<?, ?> complexColumn -> {
+                ComplexColumn<?, Object> complexColumn2 = (ComplexColumn<?, Object>) column;
+                Column<Object> baseColumn = (Column<Object>) complexColumn.getBase();
+                yield complexColumn2.toComplex(SQLUtil.getObject(resultSet, index, baseColumn));
+            }
         };
     }
 

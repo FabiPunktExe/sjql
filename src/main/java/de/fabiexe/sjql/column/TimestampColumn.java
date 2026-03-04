@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
-public final class TimestampColumn extends BasicColumn<Instant> {
+public final class TimestampColumn extends PrimitiveColumn<Instant> {
     public TimestampColumn(@NotNull Table<?> table, @NotNull String name) {
         super(table, name, Instant.class);
     }
