@@ -9,10 +9,7 @@ import de.fabiexe.sjql.expression.logical.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +41,7 @@ public class SQLUtil {
             case FloatColumn _ -> resultSet.getObject(index, Float.class);
             case BooleanColumn _ -> resultSet.getObject(index, Boolean.class);
             case UUIDColumn _ -> resultSet.getObject(index, UUID.class);
-            case TimestampColumn _ -> resultSet.getObject(index, Instant.class);
+            case TimestampColumn _ -> resultSet.getObject(index, Timestamp.class).toInstant();
             case ComplexColumn<?, ?> complexColumn -> {
                 ComplexColumn<?, Object> complexColumn2 = (ComplexColumn<?, Object>) column;
                 Column<Object> baseColumn = (Column<Object>) complexColumn.getBase();
