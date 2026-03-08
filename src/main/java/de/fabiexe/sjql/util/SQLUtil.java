@@ -26,7 +26,7 @@ public class SQLUtil {
             case FloatExpression(Float value) -> statement.setObject(index, value, Types.FLOAT);
             case BooleanExpression(Boolean value) -> statement.setObject(index, value, Types.BOOLEAN);
             case UUIDExpression(UUID value) -> statement.setObject(index, value, Types.OTHER);
-            case TimestampExpression(Instant value) -> statement.setObject(index, value, Types.TIMESTAMP);
+            case TimestampExpression(Instant value) -> statement.setObject(index, Timestamp.from(value), Types.TIMESTAMP);
             case NullExpression _ -> statement.setNull(index, Types.NULL);
         }
     }
