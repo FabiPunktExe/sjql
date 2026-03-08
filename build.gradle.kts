@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "de.fabiexe"
-version = "0.5.1"
+version = "0.5.2"
 
 java {
     toolchain {

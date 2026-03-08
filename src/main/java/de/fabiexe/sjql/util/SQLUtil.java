@@ -41,7 +41,10 @@ public class SQLUtil {
             case FloatColumn _ -> resultSet.getObject(index, Float.class);
             case BooleanColumn _ -> resultSet.getObject(index, Boolean.class);
             case UUIDColumn _ -> resultSet.getObject(index, UUID.class);
-            case TimestampColumn _ -> resultSet.getObject(index, Timestamp.class).toInstant();
+            case TimestampColumn _ -> {
+                Timestamp timestamp = resultSet.getObject(index, Timestamp.class);
+                yield timestamp == null ? null : timestamp.toInstant();
+            }
             case ComplexColumn<?, ?> complexColumn -> {
                 ComplexColumn<?, Object> complexColumn2 = (ComplexColumn<?, Object>) column;
                 Column<Object> baseColumn = (Column<Object>) complexColumn.getBase();
