@@ -13,69 +13,9 @@ import java.time.Instant;
 import java.util.UUID;
 
 public interface Expression {
-    static @NotNull Expression constant(int value) {
-        return new IntExpression(value);
-    }
-
-    static @NotNull Expression constant(double value) {
-        return new DoubleExpression(value);
-    }
-
-    static @NotNull Expression constant(long value) {
-        return new LongExpression(value);
-    }
-
-    static @NotNull Expression constant(float value) {
-        return new FloatExpression(value);
-    }
-
-    static @NotNull Expression constant(boolean value) {
-        return new BooleanExpression(value);
-    }
-
-    static @NotNull Expression constant(@Nullable String value) {
-        if (value == null) {
-            return new NullExpression();
-        } else {
-            return new StringExpression(value);
-        }
-    }
-
-    static @NotNull Expression constant(@Nullable UUID value) {
-        if (value == null) {
-            return new NullExpression();
-        } else {
-            return new UUIDExpression(value);
-        }
-    }
-
-    static @NotNull Expression constant(@Nullable kotlin.uuid.Uuid value) {
-        if (value == null) {
-            return new NullExpression();
-        } else {
-            return new UUIDExpression(UuidKt.toJavaUuid(value));
-        }
-    }
-
-    static @NotNull Expression constant(@Nullable Instant value) {
-        if (value == null) {
-            return new NullExpression();
-        } else {
-            return new TimestampExpression(value);
-        }
-    }
-
-    static @NotNull Expression constant(@Nullable kotlin.time.Instant value) {
-        if (value == null) {
-            return new NullExpression();
-        } else {
-            return new TimestampExpression(kotlin.time.jdk8.InstantConversionsJDK8Kt.toJavaInstant(value));
-        }
-    }
-
     static @NotNull Expression constant(@Nullable Object value) {
         if (value == null) {
-            return new NullExpression();
+            return NullExpression.INSTANCE;
         } else {
             return switch (value) {
                 case Integer i -> new IntExpression(i);
@@ -139,5 +79,13 @@ public interface Expression {
 
     default @NotNull Expression not() {
         return new NotExpression(this);
+    }
+
+    default @NotNull Expression isNull() {
+        return new IsNullExpression(this);
+    }
+
+    default @NotNull Expression isNotNull() {
+        return new IsNotNullExpression(this);
     }
 }

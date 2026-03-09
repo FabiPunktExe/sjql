@@ -157,4 +157,12 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
     default @NotNull Expression lte(@NotNull T value) {
         return lte(Expression.constant(value));
     }
+
+    default @NotNull Expression checkNull() {
+        return new IsNullExpression(new ColumnExpression<>(this));
+    }
+
+    default @NotNull Expression checkNotNull() {
+        return new IsNotNullExpression(new ColumnExpression<>(this));
+    }
 }

@@ -121,6 +121,14 @@ public class SQLUtil {
                 parameters.addAll(bSql.getValue());
                 yield Map.entry(sql, parameters);
             }
+            case IsNullExpression(Expression inner) -> {
+                Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(inner);
+                yield Map.entry("(" + sql.getKey() + ") IS NULL", sql.getValue());
+            }
+            case IsNotNullExpression(Expression inner) -> {
+                Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(inner);
+                yield Map.entry("(" + sql.getKey() + ") IS NOT NULL", sql.getValue());
+            }
             default -> throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
         };
     }
@@ -193,6 +201,8 @@ public class SQLUtil {
                 String bSql = buildSqlWithoutPlaceholders(b);
                 yield "(" + aSql + ") " + operator + " (" + bSql + ")";
             }
+            case IsNullExpression(Expression inner) -> "(" + buildSqlWithoutPlaceholders(inner) + ") IS NULL";
+            case IsNotNullExpression(Expression inner) -> "(" + buildSqlWithoutPlaceholders(inner) + ") IS NOT NULL";
             default -> throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
         };
     }

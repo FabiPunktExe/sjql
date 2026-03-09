@@ -24,6 +24,14 @@ public class SqlGenerationTest {
     }
 
     @Test
+    public void testIsNullAndIsNotNull() {
+        assertEquals("(name) IS NULL", SQLUtil.buildSql(Coffee.NAME.checkNull()).getKey());
+        assertEquals("(name) IS NOT NULL", SQLUtil.buildSql(Coffee.NAME.checkNotNull()).getKey());
+        assertEquals("(name) IS NULL", SQLUtil.buildSqlWithoutPlaceholders(Coffee.NAME.checkNull()));
+        assertEquals("(name) IS NOT NULL", SQLUtil.buildSqlWithoutPlaceholders(Coffee.NAME.checkNotNull()));
+    }
+
+    @Test
     public void testCurrentTimestamp() {
         assertEquals("CURRENT_TIMESTAMP", SQLUtil.buildSql(Expression.currentTimestamp()).getKey());
         assertEquals("CURRENT_TIMESTAMP", SQLUtil.buildSqlWithoutPlaceholders(Expression.currentTimestamp()));
