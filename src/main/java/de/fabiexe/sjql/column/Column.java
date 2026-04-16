@@ -3,7 +3,8 @@ package de.fabiexe.sjql.column;
 import de.fabiexe.sjql.Table;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
-import de.fabiexe.sjql.expression.logical.*;
+import de.fabiexe.sjql.expression.logical.IsNotNullExpression;
+import de.fabiexe.sjql.expression.logical.IsNullExpression;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -87,7 +88,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
     }
 
     default @NotNull Expression eq(@NotNull Expression value) {
-        return new EqualsExpression(new ColumnExpression<>(this), value);
+        return new ColumnExpression<>(this).eq(value);
     }
 
     default @NotNull Expression eq(@NotNull Column<? extends T> other) {
@@ -99,7 +100,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
     }
 
     default @NotNull Expression neq(@NotNull Expression value) {
-        return new NotEqualsExpression(new ColumnExpression<>(this), value);
+        return new ColumnExpression<>(this).neq(value);
     }
 
     default @NotNull Expression neq(@NotNull Column<? extends T> other) {
@@ -111,7 +112,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
     }
 
     default @NotNull Expression gt(@NotNull Expression value) {
-        return new GreaterThanExpression(new ColumnExpression<>(this), value);
+        return new ColumnExpression<>(this).gt(value);
     }
 
     default @NotNull Expression gt(@NotNull Column<? extends T> other) {
@@ -123,7 +124,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
     }
 
     default @NotNull Expression gte(@NotNull Expression value) {
-        return new GreaterThanOrEqualExpression(new ColumnExpression<>(this), value);
+        return new ColumnExpression<>(this).gte(value);
     }
 
     default @NotNull Expression gte(@NotNull Column<? extends T> other) {
@@ -135,7 +136,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
     }
 
     default @NotNull Expression lt(@NotNull Expression value) {
-        return new LessThanExpression(new ColumnExpression<>(this), value);
+        return new ColumnExpression<>(this).lt(value);
     }
 
     default @NotNull Expression lt(@NotNull Column<? extends T> other) {
@@ -147,7 +148,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
     }
 
     default @NotNull Expression lte(@NotNull Expression value) {
-        return new LessThanOrEqualExpression(new ColumnExpression<>(this), value);
+        return new ColumnExpression<>(this).lte(value);
     }
 
     default @NotNull Expression lte(@NotNull Column<? extends T> other) {

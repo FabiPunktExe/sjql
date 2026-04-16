@@ -2,6 +2,7 @@ package de.fabiexe.sjql;
 
 import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.expression.Expression;
+import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +50,7 @@ public interface Query<T> {
      * @return A {@link Query} with the added {@code ORDER BY} clause
      */
     default @NotNull Query<T> orderBy(@NotNull Column<?> column, boolean ascending) {
-        return orderBy(Expression.column(column), ascending);
+        return orderBy(new ColumnExpression<>(column), ascending);
     }
 
     /**
@@ -66,8 +67,8 @@ public interface Query<T> {
             @NotNull Column<?> column2, boolean ascending2
     ) {
         return orderBy(List.of(
-                Map.entry(Expression.column(column1), ascending1),
-                Map.entry(Expression.column(column2), ascending2)
+                Map.entry(new ColumnExpression<>(column1), ascending1),
+                Map.entry(new ColumnExpression<>(column2), ascending2)
         ));
     }
 
@@ -88,9 +89,9 @@ public interface Query<T> {
             @NotNull Column<?> column3, boolean ascending3
     ) {
         return orderBy(List.of(
-                Map.entry(Expression.column(column1), ascending1),
-                Map.entry(Expression.column(column2), ascending2),
-                Map.entry(Expression.column(column3), ascending3)
+                Map.entry(new ColumnExpression<>(column1), ascending1),
+                Map.entry(new ColumnExpression<>(column2), ascending2),
+                Map.entry(new ColumnExpression<>(column3), ascending3)
         ));
     }
 
