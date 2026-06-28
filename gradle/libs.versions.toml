@@ -4,7 +4,7 @@ annotations = "26.1.0"
 h2 = "2.4.240"
 sqlite = "3.53.2.0"
 postgresql = "42.7.11"
-junit = "6.1.0"
+junit = "6.1.1"
 
 [libraries]
 annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
