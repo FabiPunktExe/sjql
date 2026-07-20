@@ -87,82 +87,200 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
         return defaultValue(Expression.constant(defaultValue));
     }
 
+    /**
+     * Creates an {@code =} comparison between this column and another expression.
+     *
+     * @param value the expression to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression eq(@NotNull Expression value) {
         return new ColumnExpression<>(this).eq(value);
     }
 
+    /**
+     * Creates an {@code =} comparison between this column and another column.
+     *
+     * @param other the column to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression eq(@NotNull Column<? extends T> other) {
         return eq(new ColumnExpression<>(other));
     }
 
+    /**
+     * Creates an {@code =} comparison between this column and a constant value.
+     *
+     * @param value the value to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression eq(@NotNull T value) {
         return eq(Expression.constant(value));
     }
 
+    /**
+     * Creates a {@code !=} comparison between this column and another expression.
+     *
+     * @param value the expression to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression neq(@NotNull Expression value) {
         return new ColumnExpression<>(this).neq(value);
     }
 
+    /**
+     * Creates a {@code !=} comparison between this column and another column.
+     *
+     * @param other the column to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression neq(@NotNull Column<? extends T> other) {
         return neq(new ColumnExpression<>(other));
     }
 
+    /**
+     * Creates a {@code !=} comparison between this column and a constant value.
+     *
+     * @param value the value to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression neq(@NotNull T value) {
         return neq(Expression.constant(value));
     }
 
+    /**
+     * Creates a {@code >} comparison between this column and another expression.
+     *
+     * @param value the expression to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression gt(@NotNull Expression value) {
         return new ColumnExpression<>(this).gt(value);
     }
 
+    /**
+     * Creates a {@code >} comparison between this column and another column.
+     *
+     * @param other the column to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression gt(@NotNull Column<? extends T> other) {
         return gt(new ColumnExpression<>(other));
     }
 
+    /**
+     * Creates a {@code >} comparison between this column and a constant value.
+     *
+     * @param value the value to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression gt(@NotNull T value) {
         return gt(Expression.constant(value));
     }
 
+    /**
+     * Creates a {@code >=} comparison between this column and another expression.
+     *
+     * @param value the expression to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression gte(@NotNull Expression value) {
         return new ColumnExpression<>(this).gte(value);
     }
 
+    /**
+     * Creates a {@code >=} comparison between this column and another column.
+     *
+     * @param other the column to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression gte(@NotNull Column<? extends T> other) {
         return gte(new ColumnExpression<>(other));
     }
 
+    /**
+     * Creates a {@code >=} comparison between this column and a constant value.
+     *
+     * @param value the value to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression gte(@NotNull T value) {
         return gte(Expression.constant(value));
     }
 
+    /**
+     * Creates a {@code <} comparison between this column and another expression.
+     *
+     * @param value the expression to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression lt(@NotNull Expression value) {
         return new ColumnExpression<>(this).lt(value);
     }
 
+    /**
+     * Creates a {@code <} comparison between this column and another column.
+     *
+     * @param other the column to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression lt(@NotNull Column<? extends T> other) {
         return lt(new ColumnExpression<>(other));
     }
 
+    /**
+     * Creates a {@code <} comparison between this column and a constant value.
+     *
+     * @param value the value to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression lt(@NotNull T value) {
         return lt(Expression.constant(value));
     }
 
+    /**
+     * Creates a {@code <=} comparison between this column and another expression.
+     *
+     * @param value the expression to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression lte(@NotNull Expression value) {
         return new ColumnExpression<>(this).lte(value);
     }
 
+    /**
+     * Creates a {@code <=} comparison between this column and another column.
+     *
+     * @param other the column to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression lte(@NotNull Column<? extends T> other) {
         return lte(new ColumnExpression<>(other));
     }
 
+    /**
+     * Creates a {@code <=} comparison between this column and a constant value.
+     *
+     * @param value the value to compare with
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression lte(@NotNull T value) {
         return lte(Expression.constant(value));
     }
 
+    /**
+     * Creates an {@code IS NULL} check for this column.
+     *
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression checkNull() {
         return new IsNullExpression(new ColumnExpression<>(this));
     }
 
+    /**
+     * Creates an {@code IS NOT NULL} check for this column.
+     *
+     * @return a new {@link Expression}
+     */
     default @NotNull Expression checkNotNull() {
         return new IsNotNullExpression(new ColumnExpression<>(this));
     }
