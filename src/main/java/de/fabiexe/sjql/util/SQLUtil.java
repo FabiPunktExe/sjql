@@ -16,9 +16,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class SQLUtil {
+/** Utility methods for converting expressions and values to SQL fragments and JDBC parameters. */
+public final class SQLUtil {
+    private SQLUtil() {
+        throw new UnsupportedOperationException("This class should not be instantiated");
+    }
+
+    /**
+     * Sets a prepared statement parameter from a constant expression.
+     *
+     * @param statement the prepared statement
+     * @param index the 1-based parameter index
+     * @param expression the constant expression
+     * @throws SQLException if setting the parameter fails
+     */
     public static void setObject(@NotNull PreparedStatement statement, int index, @NotNull ConstantExpression<?> expression) throws SQLException {
         switch (expression) {
+            case NullExpression _ -> statement.setNull(index, Types.NULL);
             case IntExpression(Integer value) -> statement.setObject(index, value, Types.INTEGER);
             case DoubleExpression(Double value) -> statement.setObject(index, value, Types.DOUBLE);
             case StringExpression(String value) -> statement.setObject(index, value, Types.VARCHAR);
@@ -27,10 +41,19 @@ public class SQLUtil {
             case BooleanExpression(Boolean value) -> statement.setObject(index, value, Types.BOOLEAN);
             case UUIDExpression(UUID value) -> statement.setObject(index, value, Types.OTHER);
             case TimestampExpression(Instant value) -> statement.setObject(index, Timestamp.from(value), Types.TIMESTAMP);
-            case NullExpression _ -> statement.setNull(index, Types.NULL);
         }
     }
 
+    /**
+     * Reads a value from the given result set column and converts it to the column's Java type.
+     *
+     * @param <T> the column value type
+     * @param resultSet the result set
+     * @param index the 1-based column index
+     * @param column the column definition
+     * @return the read value, or {@code null} for SQL {@code NULL}
+     * @throws SQLException if reading fails
+     */
     @SuppressWarnings("unchecked")
     public static <T> @Nullable T getObject(@NotNull ResultSet resultSet, int index, @NotNull Column<T> column) throws SQLException {
         return (T) switch (column) {
@@ -53,6 +76,12 @@ public class SQLUtil {
         };
     }
 
+    /**
+     * Builds a parameterized SQL fragment for the given expression.
+     *
+     * @param expression the expression to convert
+     * @return a pair of SQL text and the list of constant parameters
+     */
     public static @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql(@NotNull Expression expression) {
         return switch (expression) {
             case ConstantExpression<?> constantExpression -> Map.entry("?", List.of(constantExpression));
@@ -133,6 +162,13 @@ public class SQLUtil {
         };
     }
 
+    /**
+     * Builds a SQL fragment for the given expression without using parameter placeholders.
+     * Used for {@code DEFAULT} clauses where prepared statement parameters are not allowed.
+     *
+     * @param expression the expression to convert
+     * @return the SQL text
+     */
     public static @NotNull String buildSqlWithoutPlaceholders(@NotNull Expression expression) {
         return switch (expression) {
             case StringExpression stringExpression -> "'" + stringExpression.value().replaceAll("'", "''") + "'";

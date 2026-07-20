@@ -15,11 +15,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A SQL {@code DELETE} statement implementation.
+ *
+ * @param <T> the type of the objects that represent rows in the target table
+ */
 public class BasicDeleteStatement<T> implements DeleteStatement {
     private final Table<T> table;
     private final ThrowingSupplier<Connection, SQLException> connectionSupplier;
     private Expression condition = null;
 
+    /**
+     * Creates a new delete statement for the given table.
+     *
+     * @param table the table to delete rows from
+     * @param connectionSupplier supplier for the database connection
+     */
     public BasicDeleteStatement(@NotNull Table<T> table, @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier) {
         this.table = table;
         this.connectionSupplier = connectionSupplier;

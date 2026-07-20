@@ -20,12 +20,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * A SQL {@code UPDATE} statement implementation.
+ *
+ * @param <T> the type of the objects that represent rows in the target table
+ */
 public class BasicUpdateStatement<T> implements UpdateStatement {
     private final Table<T> table;
     private final ThrowingSupplier<Connection, SQLException> connectionSupplier;
     private final WritableRow row;
     private Expression condition = null;
 
+    /**
+     * Creates a new update statement for the given table.
+     *
+     * @param table the table to update rows in
+     * @param connectionSupplier supplier for the database connection
+     * @param builder consumer that populates the values to update
+     */
     public BasicUpdateStatement(@NotNull Table<T> table, @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier, @NotNull Consumer<WritableRow> builder) {
         this.table = table;
         this.connectionSupplier = connectionSupplier;
