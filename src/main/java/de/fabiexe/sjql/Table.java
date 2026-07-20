@@ -163,10 +163,14 @@ public class Table<T> {
      * Inserts a new row into this table. This method may only be used inside a transaction.
      *
      * @param builder A consumer that builds the row to be inserted
+     * @throws IllegalStateException If this method is not called inside a transaction
      * @throws SQLException If an SQL error occurs during insertion
      * @see Database#transaction(Runnable)
      */
     public void insert(@NotNull Consumer<WritableRow> builder) throws SQLException {
+        if (!Database.CURRENT_DATABASE.isBound()) {
+            throw new IllegalStateException("This method can only be called inside a transaction");
+        }
         WritableRow row = new BasicWritableRow<>(this);
         builder.accept(row);
         Database.CURRENT_DATABASE.get().insert(this, row);
@@ -176,9 +180,13 @@ public class Table<T> {
      * Deletes rows from this table. This method may only be used inside a transaction.
      *
      * @return A {@link DeleteStatement} that can be used to specify and execute the delete operation
+     * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
     public @NotNull DeleteStatement delete() {
+        if (!Database.CURRENT_DATABASE.isBound()) {
+            throw new IllegalStateException("This method can only be called inside a transaction");
+        }
         return Database.CURRENT_DATABASE.get().delete(this);
     }
 
@@ -188,9 +196,13 @@ public class Table<T> {
      * @param builder A consumer that defines how to build the update values for each row.
      *                It receives a {@link WritableRow} that can be used to set the new values for the columns.
      * @return An {@link UpdateStatement} that can be used to specify and execute the update operation
+     * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
     public @NotNull UpdateStatement update(@NotNull Consumer<WritableRow> builder) {
+        if (!Database.CURRENT_DATABASE.isBound()) {
+            throw new IllegalStateException("This method can only be called inside a transaction");
+        }
         return Database.CURRENT_DATABASE.get().update(this, builder);
     }
 
@@ -202,6 +214,7 @@ public class Table<T> {
      * @param column The column to update
      * @param value The new value for the column
      * @return An {@link UpdateStatement} that can be used to specify and execute the update operation
+     * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
     public <U> @NotNull UpdateStatement update(@NotNull Column<U> column, U value) {
@@ -219,6 +232,7 @@ public class Table<T> {
      * @param column2 The second column to update
      * @param value2 The new value for the second column
      * @return An {@link UpdateStatement} that can be used to specify and execute the update operation
+     * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
     public <U, V> @NotNull UpdateStatement update(
@@ -245,6 +259,7 @@ public class Table<T> {
      * @param column3 The third column to update
      * @param value3 The new value for the third column
      * @return An {@link UpdateStatement} that can be used to specify and execute the update operation
+     * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
     public <U, V, W> @NotNull UpdateStatement update(
@@ -263,8 +278,13 @@ public class Table<T> {
      * Creates a new query for selecting objects of type {@code T} from this table.
      *
      * @return A {@link Query} that can be used to specify and execute the selection operation
+     * @throws IllegalStateException If this method is not called inside a transaction
+     * @see Database#transaction(Runnable)
      */
     public @NotNull Query<List<T>> select() {
+        if (!Database.CURRENT_DATABASE.isBound()) {
+            throw new IllegalStateException("This method can only be called inside a transaction");
+        }
         return Database.CURRENT_DATABASE.get().select(this);
     }
 
@@ -272,6 +292,7 @@ public class Table<T> {
      * Counts the number of rows in this table. This method may only be used inside a transaction.
      *
      * @return The number of rows in this table
+     * @throws IllegalStateException If this method is not called inside a transaction
      * @throws SQLException If a database error occurs
      * @see Database#transaction(Runnable)
      */
