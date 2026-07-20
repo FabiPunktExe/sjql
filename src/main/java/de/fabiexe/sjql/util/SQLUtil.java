@@ -56,7 +56,7 @@ public class SQLUtil {
     public static @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql(@NotNull Expression expression) {
         return switch (expression) {
             case ConstantExpression<?> constantExpression -> Map.entry("?", List.of(constantExpression));
-            case ColumnExpression<?> columnExpression -> Map.entry(columnExpression.column().name(), List.of());
+            case ColumnExpression<?> columnExpression -> Map.entry("`" + columnExpression.column().name() + "`", List.of());
             case CurrentTimestampExpression _ -> Map.entry("CURRENT_TIMESTAMP", List.of());
             case NotExpression notExpression -> {
                 Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(notExpression.expression());
@@ -140,7 +140,7 @@ public class SQLUtil {
             case TimestampExpression timestampExpression -> "'" + timestampExpression.value() + "'";
             case NullExpression _ -> "NULL";
             case ConstantExpression<?> constantExpression -> String.valueOf(constantExpression.value());
-            case ColumnExpression<?> columnExpression -> columnExpression.column().name();
+            case ColumnExpression<?> columnExpression -> "`" + columnExpression.column().name() + "`";
             case CurrentTimestampExpression _ -> "CURRENT_TIMESTAMP";
             case NotExpression notExpression -> {
                 String sql = buildSqlWithoutPlaceholders(notExpression.expression());
