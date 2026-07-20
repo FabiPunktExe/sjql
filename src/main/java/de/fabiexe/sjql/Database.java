@@ -146,9 +146,10 @@ public interface Database {
      *
      * @param dataSource The data source to use for the database connection
      * @return A new {@link Database} instance or {@code null} if the database type is not supported
+     * @throws IllegalArgumentException If the data source is not supported
      * @throws SQLException If a database access error occurs
      */
-    static @Nullable Database create(@NotNull DataSource dataSource) throws SQLException {
+    static @NotNull Database create(@NotNull DataSource dataSource) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             String url = connection.getMetaData().getURL();
             if (url.startsWith("jdbc:sqlite:")) {
@@ -158,7 +159,7 @@ public interface Database {
             } else if (url.startsWith("jdbc:postgresql:")) {
                 return new PostgreSQLDatabase(dataSource);
             } else {
-                return null;
+                throw new IllegalArgumentException("Unsupported database type: " + url);
             }
         }
     }
