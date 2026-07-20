@@ -10,27 +10,45 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Represents a SQL expression. Expressions can be combined with comparison, logical and arithmetic operators
+ * to build {@code WHERE}, {@code ORDER BY} and {@code SET} clauses.
+ * Use {@link #constant(Object)} to create an expression from a Java value and {@link Expression#currentTimestamp()}
+ * for the database's current timestamp.
+ */
 public interface Expression {
+    /**
+     * Creates a constant expression from the given Java value.
+     * Supported value types are {@code null}, {@link Integer}, {@link Long}, {@link Float},
+     * {@link Double}, {@link Boolean}, {@link String}, {@link UUID}, {@link Instant} and their
+     * Kotlin counterparts.
+     *
+     * @param value the value to convert
+     * @return a {@link ConstantExpression} representing the value
+     * @throws IllegalArgumentException if the value type is not supported
+     */
     static @NotNull Expression constant(@Nullable Object value) {
-        if (value == null) {
-            return NullExpression.INSTANCE;
-        } else {
-            return switch (value) {
-                case Integer i -> new IntExpression(i);
-                case Long l -> new LongExpression(l);
-                case Float f -> new FloatExpression(f);
-                case Double d -> new DoubleExpression(d);
-                case Boolean b -> new BooleanExpression(b);
-                case String s -> new StringExpression(s);
-                case UUID u -> new UUIDExpression(u);
-                case kotlin.uuid.Uuid u -> new UUIDExpression(UuidKt.toJavaUuid(u));
-                case Instant t -> new TimestampExpression(t);
-                case kotlin.time.Instant t -> new TimestampExpression(kotlin.time.jdk8.InstantConversionsJDK8Kt.toJavaInstant(t));
-                default -> throw new IllegalArgumentException("Unsupported constant value type: " + value.getClass().getName());
-            };
-        }
+        return switch (value) {
+            case null -> NullExpression.INSTANCE;
+            case Integer i -> new IntExpression(i);
+            case Long l -> new LongExpression(l);
+            case Float f -> new FloatExpression(f);
+            case Double d -> new DoubleExpression(d);
+            case Boolean b -> new BooleanExpression(b);
+            case String s -> new StringExpression(s);
+            case UUID u -> new UUIDExpression(u);
+            case kotlin.uuid.Uuid u -> new UUIDExpression(UuidKt.toJavaUuid(u));
+            case Instant t -> new TimestampExpression(t);
+            case kotlin.time.Instant t -> new TimestampExpression(kotlin.time.jdk8.InstantConversionsJDK8Kt.toJavaInstant(t));
+            default -> throw new IllegalArgumentException("Unsupported constant value type: " + value.getClass().getName());
+        };
     }
 
+    /**
+     * Creates an expression that evaluates to the database's current timestamp.
+     *
+     * @return a {@link CurrentTimestampExpression}
+     */
     static @NotNull Expression currentTimestamp() {
         return new CurrentTimestampExpression();
     }
