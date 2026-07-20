@@ -68,15 +68,15 @@ public abstract class BasicDatabase implements Database {
     @Override
     public void createTable(@NotNull Table<?> table) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS `")
+            StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
                     .append(table.getName())
-                    .append("` (");
+                    .append(" (");
 
             List<Column<?>> columns = table.getColumns();
             List<Column<?>> primaryKeys = new ArrayList<>();
             for (int i = 0; i < columns.size(); i++) {
                 Column<?> column = columns.get(i);
-                sql.append('`').append(column.name()).append("` ").append(getColumnType(column));
+                sql.append(column.name()).append(' ').append(getColumnType(column));
 
                 if (column.isPrimaryKey()) {
                     primaryKeys.add(column);
@@ -104,7 +104,7 @@ public abstract class BasicDatabase implements Database {
             if (!primaryKeys.isEmpty()) {
                 sql.append(", PRIMARY KEY (");
                 for (int i = 0; i < primaryKeys.size(); i++) {
-                    sql.append('`').append(primaryKeys.get(i).name()).append('`');
+                    sql.append(primaryKeys.get(i).name());
                     if (i < primaryKeys.size() - 1) {
                         sql.append(", ");
                     }
@@ -123,7 +123,7 @@ public abstract class BasicDatabase implements Database {
     @Override
     public void deleteTable(@NotNull Table<?> table) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            String sql = "DROP TABLE IF EXISTS `" + table.getName() + "`";
+            String sql = "DROP TABLE IF EXISTS " + table.getName();
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.execute();
             }
@@ -154,9 +154,9 @@ public abstract class BasicDatabase implements Database {
         }
 
         try (Connection connection = dataSource.getConnection()) {
-            StringBuilder sql = new StringBuilder("INSERT INTO `")
+            StringBuilder sql = new StringBuilder("INSERT INTO ")
                     .append(table.getName())
-                    .append("` (");
+                    .append(" (");
 
             boolean first = true;
             for (Column<?> column : table.getColumns()) {
@@ -168,7 +168,7 @@ public abstract class BasicDatabase implements Database {
                 } else {
                     sql.append(", ");
                 }
-                sql.append('`').append(column.name()).append('`');
+                sql.append(column.name());
             }
 
             sql.append(") VALUES (");
