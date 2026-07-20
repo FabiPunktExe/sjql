@@ -82,6 +82,12 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
     @Contract("-> this")
     @NotNull Column<@NotNull T> notNull();
 
+    /**
+     * Sets the default value of the column to a constant value.
+     *
+     * @param defaultValue the default value to set
+     * @return this column for chaining
+     */
     @Contract("_ -> this")
     default @NotNull Column<T> defaultValue(@NotNull T defaultValue) {
         return defaultValue(Expression.constant(defaultValue));

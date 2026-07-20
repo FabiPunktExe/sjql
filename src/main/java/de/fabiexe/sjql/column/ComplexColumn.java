@@ -5,15 +5,35 @@ import de.fabiexe.sjql.expression.Expression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A column that maps a complex Java type to a primitive database column.
+ *
+ * @param <T> the complex Java type
+ * @param <B> the primitive base type stored in the database
+ */
 public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
     private final Class<T> type;
     private final Column<B> base;
 
+    /**
+     * Creates a complex column backed by the given base column.
+     *
+     * @param type the complex Java type
+     * @param base the primitive base column
+     */
     public ComplexColumn(@NotNull Class<T> type, @NotNull Column<B> base) {
         this.type = type;
         this.base = base;
     }
 
+    /**
+     * Creates a complex column backed by a newly created primitive column.
+     *
+     * @param type the complex Java type
+     * @param primitiveType the primitive database type
+     * @param table the table to add the column to
+     * @param name the column name
+     */
     public ComplexColumn(
             @NotNull Class<T> type,
             @NotNull Class<B> primitiveType,
@@ -23,7 +43,20 @@ public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
         this(type, PrimitiveColumn.create(primitiveType, table, name));
     }
 
+    /**
+     * Converts a primitive database value to the complex type.
+     *
+     * @param value the primitive value
+     * @return the complex value
+     */
     public abstract T toComplex(B value);
+
+    /**
+     * Converts a complex value to the primitive database type.
+     *
+     * @param value the complex value
+     * @return the primitive value
+     */
     public abstract B toBase(T value);
 
     @Override

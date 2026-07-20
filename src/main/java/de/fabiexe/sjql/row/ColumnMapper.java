@@ -2,12 +2,25 @@ package de.fabiexe.sjql.row;
 
 import de.fabiexe.sjql.column.Column;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public class ColumnMapper<T> implements Function<Object, T> {
+/**
+ * Maps a raw database value to the type expected by a constructor parameter.
+ *
+ * @param <T> the target type of the mapping
+ */
+public class ColumnMapper<T> implements Function<@Nullable Object, T> {
     private final Column<T> column;
 
+    /**
+     * Creates a new mapper for the given constructor parameter type and column.
+     *
+     * @param type the constructor parameter type
+     * @param column the column providing the raw value
+     * @throws IllegalArgumentException if the column type is not assignable to the parameter type
+     */
     public ColumnMapper(@NotNull Class<?> type, @NotNull Column<T> column) {
         if (type.isPrimitive()) {
             type = primitiveToWrapper(type);
@@ -31,7 +44,7 @@ public class ColumnMapper<T> implements Function<Object, T> {
     }
 
     @Override
-    public T apply(Object o) {
+    public T apply(@Nullable Object o) {
         if (o == null) {
             return null;
         }
