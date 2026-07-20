@@ -14,7 +14,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/** A {@link BasicDatabase} implementation for H2. */
 public class H2Database extends BasicDatabase {
+    /**
+     * Creates a new H2 database instance.
+     *
+     * @param dataSource the data source to use
+     */
     public H2Database(@NotNull DataSource dataSource) {
         super(dataSource);
     }

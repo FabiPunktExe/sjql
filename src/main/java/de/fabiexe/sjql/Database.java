@@ -7,7 +7,6 @@ import de.fabiexe.sjql.row.ReadableRow;
 import de.fabiexe.sjql.row.WritableRow;
 import de.fabiexe.sjql.util.ThrowingRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -16,6 +15,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Entry point for interacting with a SQL database.
+ * Implementations provide database-specific SQL generation and execution.
+ * Use {@link #create(DataSource)} to obtain a {@link Database} instance for a supported data source.
+ * All mutating operations (insert, update, delete) must be performed inside a transaction
+ * via one of the {@code transaction(...)} methods.
+ */
 public interface Database {
     /** A scoped value that holds the current {@link Database} instance for the duration of a transaction. */
     ScopedValue<Database> CURRENT_DATABASE = ScopedValue.newInstance();

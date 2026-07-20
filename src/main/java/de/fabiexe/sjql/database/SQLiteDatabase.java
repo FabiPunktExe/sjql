@@ -11,7 +11,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/** A {@link BasicDatabase} implementation for SQLite. */
 public class SQLiteDatabase extends BasicDatabase {
+    /**
+     * Creates a new SQLite database instance.
+     *
+     * @param dataSource the data source to use
+     */
     public SQLiteDatabase(@NotNull DataSource dataSource) {
         super(dataSource);
     }

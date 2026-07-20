@@ -14,7 +14,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/** A {@link BasicDatabase} implementation for PostgreSQL. */
 public class PostgreSQLDatabase extends BasicDatabase {
+    /**
+     * Creates a new PostgreSQL database instance.
+     *
+     * @param dataSource the data source to use
+     */
     public PostgreSQLDatabase(@NotNull DataSource dataSource) {
         super(dataSource);
     }
