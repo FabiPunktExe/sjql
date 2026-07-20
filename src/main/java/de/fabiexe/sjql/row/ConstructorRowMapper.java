@@ -7,11 +7,23 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
+/**
+ * Maps a {@link ReadableRow} to an object by invoking a matching constructor.
+ *
+ * @param <T> the type of the target object
+ */
 public class ConstructorRowMapper<T> implements Function<ReadableRow<T>, T> {
     private final Column<?>[] columns;
     private final Constructor<T> constructor;
     private final ColumnMapper<?>[] columnMappers;
 
+    /**
+     * Creates a row mapper that searches a constructor of {@code type} matching the given columns.
+     *
+     * @param type the target class
+     * @param columns the columns to pass as constructor arguments
+     * @throws IllegalArgumentException if no matching constructor can be found
+     */
     @SuppressWarnings("unchecked")
     public ConstructorRowMapper(@NotNull Class<T> type, @NotNull Column<?> @NotNull [] columns) {
         Class<?>[] columnTypes = new Class<?>[columns.length];

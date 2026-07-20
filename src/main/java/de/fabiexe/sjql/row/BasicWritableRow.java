@@ -9,10 +9,20 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Default implementation of {@link WritableRow} backed by a map of column expressions.
+ *
+ * @param <T> the type of the objects that represent rows in the table
+ */
 public class BasicWritableRow<T> implements WritableRow {
     private final Table<T> table;
     private final Map<Column<?>, Expression> values = new HashMap<>();
 
+    /**
+     * Creates a new writable row for the given table.
+     *
+     * @param table the table this row belongs to
+     */
     public BasicWritableRow(@NotNull Table<T> table) {
         this.table = table;
     }

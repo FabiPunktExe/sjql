@@ -8,10 +8,21 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Default implementation of {@link ReadableRow} backed by a map of column values.
+ *
+ * @param <T> the type of the objects that represent rows in the table
+ */
 public class BasicReadableRow<T> implements ReadableRow<T> {
     private final Table<T> table;
     private final Map<Column<?>, Object> values;
 
+    /**
+     * Creates a new readable row for the given table and column values.
+     *
+     * @param table the table this row belongs to
+     * @param values the column values
+     */
     public BasicReadableRow(@NotNull Table<T> table, @NotNull Map<Column<?>, Object> values) {
         this.table = table;
         this.values = new HashMap<>(values);
