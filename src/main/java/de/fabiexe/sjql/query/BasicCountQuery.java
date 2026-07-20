@@ -13,7 +13,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A query that counts the number of matching rows.
+ *
+ * @param <T> the type of the objects that represent rows in the queried table
+ */
 public class BasicCountQuery<T> extends BasicQuery<T, Long> {
+    /**
+     * Creates a count query that copies the modifiers from another query.
+     *
+     * @param query the query whose modifiers should be copied
+     */
     public BasicCountQuery(@NotNull BasicQuery<T, ?> query) {
         super(query.table, query.connectionSupplier);
         condition = query.condition;

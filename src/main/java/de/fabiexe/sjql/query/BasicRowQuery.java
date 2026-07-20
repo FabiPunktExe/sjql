@@ -19,7 +19,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A query that returns raw {@link ReadableRow} instances.
+ *
+ * @param <T> the type of the objects that represent rows in the queried table
+ */
 public class BasicRowQuery<T> extends BasicQuery<T, List<ReadableRow<T>>> {
+    /**
+     * Creates a new row query for the given table.
+     *
+     * @param table the table to query
+     * @param connectionSupplier supplier for the database connection
+     */
     public BasicRowQuery(@NotNull Table<T> table, @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier) {
         super(table, connectionSupplier);
     }

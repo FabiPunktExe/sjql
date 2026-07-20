@@ -12,7 +12,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A query that returns mapped objects of type {@code T}.
+ *
+ * @param <T> the type of the objects that represent rows in the queried table
+ */
 public class BasicValueQuery<T> extends BasicQuery<T, List<T>> {
+    /**
+     * Creates a new value query for the given table.
+     *
+     * @param table the table to query
+     * @param connectionSupplier supplier for the database connection
+     */
     public BasicValueQuery(
             @NotNull Table<T> table,
             @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier

@@ -8,6 +8,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A query that always returns a pre-defined constant value.
+ *
+ * @param <T> the type of the constant value
+ * @param value the constant value which should returned by {@link #execute()}
+ */
 public record ConstantQuery<T>(@Nullable T value) implements Query<T> {
     @Override
     public @NotNull Query<T> where(@NotNull Expression condition) {
