@@ -56,6 +56,22 @@ public abstract class BasicDatabase implements Database {
     protected abstract @Nullable String getPrimaryKeyAddition(Column<?> column);
 
     /**
+     * Escapes the given table name for safe use in SQL queries.
+     *
+     * @param name the table name to escape
+     * @return the escaped table name
+     */
+    public abstract String escapeTableName(String name);
+
+    /**
+     * Escapes the given column name for safe use in SQL queries.
+     *
+     * @param name the column name to escape
+     * @return the escaped column name
+     */
+    public abstract String escapeColumnName(String name);
+
+    /**
      * Gets the data source used by this database.
      *
      * @return the data source
@@ -68,14 +84,14 @@ public abstract class BasicDatabase implements Database {
     public void createTable(Table<?> table) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
-                    .append(table.getName())
+                    .append(escapeTableName(table.getName()))
                     .append(" (");
 
             List<Column<?>> columns = table.getColumns();
             List<Column<?>> primaryKeys = new ArrayList<>();
             for (int i = 0; i < columns.size(); i++) {
                 Column<?> column = columns.get(i);
-                sql.append(column.name()).append(' ').append(getColumnType(column));
+                sql.append(escapeColumnName(column.name())).append(' ').append(getColumnType(column));
 
                 if (column.isPrimaryKey()) {
                     primaryKeys.add(column);
@@ -96,7 +112,7 @@ public abstract class BasicDatabase implements Database {
 
                 Expression defaultValue = column.defaultValue();
                 if (defaultValue != null) {
-                    sql.append(" DEFAULT ").append(SQLUtil.buildSqlWithoutPlaceholders(defaultValue));
+                    sql.append(" DEFAULT ").append(SQLUtil.buildSqlWithoutPlaceholders(this, defaultValue));
                 }
 
                 if (i < columns.size() - 1) {
@@ -107,7 +123,7 @@ public abstract class BasicDatabase implements Database {
             if (!primaryKeys.isEmpty()) {
                 sql.append(", PRIMARY KEY (");
                 for (int i = 0; i < primaryKeys.size(); i++) {
-                    sql.append(primaryKeys.get(i).name());
+                    sql.append(escapeColumnName(primaryKeys.get(i).name()));
                     if (i < primaryKeys.size() - 1) {
                         sql.append(", ");
                     }
@@ -119,7 +135,7 @@ public abstract class BasicDatabase implements Database {
                 sql.append(", UNIQUE (");
                 List<Column<?>> constraintColumns = uniqueConstraint.columns();
                 for (int i = 0; i < constraintColumns.size(); i++) {
-                    sql.append(constraintColumns.get(i).name());
+                    sql.append(escapeColumnName(constraintColumns.get(i).name()));
                     if (i < constraintColumns.size() - 1) {
                         sql.append(", ");
                     }
@@ -138,7 +154,7 @@ public abstract class BasicDatabase implements Database {
     @Override
     public void deleteTable(Table<?> table) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            String sql = "DROP TABLE IF EXISTS " + table.getName();
+            String sql = "DROP TABLE IF EXISTS " + escapeTableName(table.getName());
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.execute();
             }
@@ -147,12 +163,12 @@ public abstract class BasicDatabase implements Database {
 
     @Override
     public <T extends @Nullable Object> DeleteStatement delete(Table<T> table) {
-        return new BasicDeleteStatement<>(table, dataSource::getConnection);
+        return new BasicDeleteStatement<>(this, table, dataSource::getConnection);
     }
 
     @Override
     public <T extends @Nullable Object> UpdateStatement update(Table<T> table, Consumer<WritableRow> builder) {
-        return new BasicUpdateStatement<>(table, dataSource::getConnection, builder);
+        return new BasicUpdateStatement<>(this, table, dataSource::getConnection, builder);
     }
 
     @Override
@@ -170,7 +186,7 @@ public abstract class BasicDatabase implements Database {
 
         try (Connection connection = dataSource.getConnection()) {
             StringBuilder sql = new StringBuilder("INSERT INTO ")
-                    .append(table.getName())
+                    .append(escapeTableName(table.getName()))
                     .append(" (");
 
             boolean first = true;
@@ -183,7 +199,7 @@ public abstract class BasicDatabase implements Database {
                 } else {
                     sql.append(", ");
                 }
-                sql.append(column.name());
+                sql.append(escapeColumnName(column.name()));
             }
 
             sql.append(") VALUES (");
@@ -200,7 +216,7 @@ public abstract class BasicDatabase implements Database {
                     sql.append(", ");
                 }
                 Expression expression = Objects.requireNonNull(row.get(column));
-                Map.Entry<String, List<ConstantExpression<?>>> sqlEntry = SQLUtil.buildSql(expression);
+                Map.Entry<String, List<ConstantExpression<?>>> sqlEntry = SQLUtil.buildSql(this, expression);
                 sql.append(sqlEntry.getKey());
                 parameters.addAll(sqlEntry.getValue());
             }
@@ -218,12 +234,12 @@ public abstract class BasicDatabase implements Database {
 
     @Override
     public <T extends @Nullable Object> Query<List<ReadableRow>> selectRows(Table<T> table) {
-        return new BasicRowQuery<>(table, dataSource::getConnection);
+        return new BasicRowQuery<>(this, table, dataSource::getConnection);
     }
 
     @Override
     public <T extends @Nullable Object> Query<List<T>> select(Table<T> table) {
-        return new BasicValueQuery<>(table, dataSource::getConnection);
+        return new BasicValueQuery<>(this, table, dataSource::getConnection);
     }
 
     /**

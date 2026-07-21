@@ -2,6 +2,7 @@ package de.fabiexe.sjql.query;
 
 import de.fabiexe.sjql.Query;
 import de.fabiexe.sjql.Table;
+import de.fabiexe.sjql.database.BasicDatabase;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.util.ThrowingSupplier;
 import org.jspecify.annotations.Nullable;
@@ -19,6 +20,9 @@ import java.util.Map;
  * @param <U> the type of the query result
  */
 public abstract class BasicQuery<T extends @Nullable Object, U extends @Nullable Object> implements Query<U> {
+    /** The database this query operates on. */
+    protected final BasicDatabase database;
+
     /** The table this query operates on. */
     protected final Table<T> table;
 
@@ -37,10 +41,16 @@ public abstract class BasicQuery<T extends @Nullable Object, U extends @Nullable
     /**
      * Creates a new basic query for the given table.
      *
+     * @param database the database to query
      * @param table the table to query
      * @param connectionSupplier supplier for the database connection
      */
-    public BasicQuery(Table<T> table, ThrowingSupplier<Connection, SQLException> connectionSupplier) {
+    public BasicQuery(
+            BasicDatabase database,
+            Table<T> table,
+            ThrowingSupplier<Connection, SQLException> connectionSupplier
+    ) {
+        this.database = database;
         this.table = table;
         this.connectionSupplier = connectionSupplier;
     }
@@ -71,6 +81,6 @@ public abstract class BasicQuery<T extends @Nullable Object, U extends @Nullable
 
     @Override
     public Query<Long> count() {
-        return new BasicCountQuery<>(this);
+        return new BasicCountQuery<>(database, this);
     }
 }

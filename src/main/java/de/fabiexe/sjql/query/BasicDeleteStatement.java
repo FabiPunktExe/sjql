@@ -2,6 +2,7 @@ package de.fabiexe.sjql.query;
 
 import de.fabiexe.sjql.DeleteStatement;
 import de.fabiexe.sjql.Table;
+import de.fabiexe.sjql.database.BasicDatabase;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
 import de.fabiexe.sjql.util.SQLUtil;
@@ -21,6 +22,7 @@ import java.util.Map;
  * @param <T> the type of the objects that represent rows in the target table
  */
 public class BasicDeleteStatement<T extends @Nullable Object> implements DeleteStatement {
+    private final BasicDatabase database;
     private final Table<T> table;
     private final ThrowingSupplier<Connection, SQLException> connectionSupplier;
     private @Nullable Expression condition = null;
@@ -28,10 +30,16 @@ public class BasicDeleteStatement<T extends @Nullable Object> implements DeleteS
     /**
      * Creates a new delete statement for the given table.
      *
+     * @param database the database to delete rows from
      * @param table the table to delete rows from
      * @param connectionSupplier supplier for the database connection
      */
-    public BasicDeleteStatement(Table<T> table, ThrowingSupplier<Connection, SQLException> connectionSupplier) {
+    public BasicDeleteStatement(
+            BasicDatabase database,
+            Table<T> table,
+            ThrowingSupplier<Connection, SQLException> connectionSupplier
+    ) {
+        this.database = database;
         this.table = table;
         this.connectionSupplier = connectionSupplier;
     }
@@ -57,11 +65,11 @@ public class BasicDeleteStatement<T extends @Nullable Object> implements DeleteS
     }
 
     private Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
-        StringBuilder sql = new StringBuilder("DELETE FROM ").append(table.getName());
+        StringBuilder sql = new StringBuilder("DELETE FROM ").append(database.escapeTableName(table.getName()));
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {
             sql.append(" WHERE ");
-            Map.Entry<String, List<ConstantExpression<?>>> conditionSql = SQLUtil.buildSql(condition);
+            Map.Entry<String, List<ConstantExpression<?>>> conditionSql = SQLUtil.buildSql(database, condition);
             sql.append(conditionSql.getKey());
             parameters.addAll(conditionSql.getValue());
         }

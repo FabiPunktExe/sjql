@@ -3,6 +3,7 @@ package de.fabiexe.sjql.database;
 import de.fabiexe.sjql.Coffee;
 import de.fabiexe.sjql.CompositeKey;
 import de.fabiexe.sjql.Database;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,10 +22,14 @@ public abstract class AbstractDatabaseTest {
     @BeforeEach
     public void setup() throws SQLException {
         database = Objects.requireNonNull(Database.create(createDataSource()));
+        database.createTable(Coffee.TABLE);
+    }
+
+    @AfterEach
+    public void cleanup() throws SQLException {
         if (database.tableExists(Coffee.TABLE)) {
             database.deleteTable(Coffee.TABLE);
         }
-        database.createTable(Coffee.TABLE);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package de.fabiexe.sjql.util;
 
 import de.fabiexe.sjql.column.*;
+import de.fabiexe.sjql.database.BasicDatabase;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.constant.*;
 import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
@@ -78,16 +79,20 @@ public final class SQLUtil {
     /**
      * Builds a parameterized SQL fragment for the given expression.
      *
+     * @param database the database to use for name escaping
      * @param expression the expression to convert
      * @return a pair of SQL text and the list of constant parameters
      */
-    public static Map.Entry<String, List<ConstantExpression<?>>> buildSql(Expression expression) {
+    public static Map.Entry<String, List<ConstantExpression<?>>> buildSql(BasicDatabase database, Expression expression) {
         return switch (expression) {
             case ConstantExpression<?> constantExpression -> Map.entry("?", List.of(constantExpression));
-            case ColumnExpression<?> columnExpression -> Map.entry(columnExpression.column().name(), List.of());
+            case ColumnExpression<?> columnExpression -> {
+                String name = database.escapeColumnName(columnExpression.column().name());
+                yield Map.entry(name, List.of());
+            }
             case CurrentTimestampExpression _ -> Map.entry("CURRENT_TIMESTAMP", List.of());
             case NotExpression notExpression -> {
-                Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(notExpression.expression());
+                Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(database, notExpression.expression());
                 yield Map.entry("(NOT (" + sql.getKey() + "))", sql.getValue());
             }
             case LogicalExpression logicalExpression -> {
@@ -141,8 +146,8 @@ public final class SQLUtil {
                     }
                     default -> throw new IllegalArgumentException("Unsupported logical expression type: " + expression.getClass().getName());
                 }
-                Map.Entry<String, List<ConstantExpression<?>>> aSql = buildSql(a);
-                Map.Entry<String, List<ConstantExpression<?>>> bSql = buildSql(b);
+                Map.Entry<String, List<ConstantExpression<?>>> aSql = buildSql(database, a);
+                Map.Entry<String, List<ConstantExpression<?>>> bSql = buildSql(database, b);
                 String sql = "(" + aSql.getKey() + ") " + operator + " (" + bSql.getKey() + ")";
                 List<ConstantExpression<?>> parameters = new ArrayList<>();
                 parameters.addAll(aSql.getValue());
@@ -150,11 +155,11 @@ public final class SQLUtil {
                 yield Map.entry(sql, parameters);
             }
             case IsNullExpression(Expression inner) -> {
-                Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(inner);
+                Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(database, inner);
                 yield Map.entry("(" + sql.getKey() + ") IS NULL", sql.getValue());
             }
             case IsNotNullExpression(Expression inner) -> {
-                Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(inner);
+                Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(database, inner);
                 yield Map.entry("(" + sql.getKey() + ") IS NOT NULL", sql.getValue());
             }
             default -> throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
@@ -165,20 +170,21 @@ public final class SQLUtil {
      * Builds a SQL fragment for the given expression without using parameter placeholders.
      * Used for {@code DEFAULT} clauses where prepared statement parameters are not allowed.
      *
+     * @param database the database to use for name escaping
      * @param expression the expression to convert
      * @return the SQL text
      */
-    public static String buildSqlWithoutPlaceholders(Expression expression) {
+    public static String buildSqlWithoutPlaceholders(BasicDatabase database, Expression expression) {
         return switch (expression) {
             case StringExpression stringExpression -> "'" + stringExpression.value().replaceAll("'", "''") + "'";
             case UUIDExpression uuidExpression -> "'" + uuidExpression.value() + "'";
             case TimestampExpression timestampExpression -> "'" + timestampExpression.value() + "'";
             case NullExpression _ -> "NULL";
             case ConstantExpression<?> constantExpression -> String.valueOf(constantExpression.value());
-            case ColumnExpression<?> columnExpression -> columnExpression.column().name();
+            case ColumnExpression<?> columnExpression -> database.escapeColumnName(columnExpression.column().name());
             case CurrentTimestampExpression _ -> "CURRENT_TIMESTAMP";
             case NotExpression notExpression -> {
-                String sql = buildSqlWithoutPlaceholders(notExpression.expression());
+                String sql = buildSqlWithoutPlaceholders(database, notExpression.expression());
                 yield "(NOT (" + sql + "))";
             }
             case LogicalExpression logicalExpression -> {
@@ -232,12 +238,12 @@ public final class SQLUtil {
                     }
                     default -> throw new IllegalArgumentException("Unsupported logical expression type: " + expression.getClass().getName());
                 }
-                String aSql = buildSqlWithoutPlaceholders(a);
-                String bSql = buildSqlWithoutPlaceholders(b);
+                String aSql = buildSqlWithoutPlaceholders(database, a);
+                String bSql = buildSqlWithoutPlaceholders(database, b);
                 yield "(" + aSql + ") " + operator + " (" + bSql + ")";
             }
-            case IsNullExpression(Expression inner) -> "(" + buildSqlWithoutPlaceholders(inner) + ") IS NULL";
-            case IsNotNullExpression(Expression inner) -> "(" + buildSqlWithoutPlaceholders(inner) + ") IS NOT NULL";
+            case IsNullExpression(Expression inner) -> "(" + buildSqlWithoutPlaceholders(database, inner) + ") IS NULL";
+            case IsNotNullExpression(Expression inner) -> "(" + buildSqlWithoutPlaceholders(database, inner) + ") IS NOT NULL";
             default -> throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
         };
     }

@@ -2,6 +2,7 @@ package de.fabiexe.sjql.query;
 
 import de.fabiexe.sjql.Query;
 import de.fabiexe.sjql.Table;
+import de.fabiexe.sjql.database.BasicDatabase;
 import de.fabiexe.sjql.row.ReadableRow;
 import de.fabiexe.sjql.util.ThrowingSupplier;
 import org.jspecify.annotations.Nullable;
@@ -20,20 +21,22 @@ public class BasicValueQuery<T extends @Nullable Object> extends BasicQuery<T, L
     /**
      * Creates a new value query for the given table.
      *
+     * @param database the database to query
      * @param table the table to query
      * @param connectionSupplier supplier for the database connection
      */
     public BasicValueQuery(
+            BasicDatabase database,
             Table<T> table,
             ThrowingSupplier<Connection, SQLException> connectionSupplier
     ) {
-        super(table, connectionSupplier);
+        super(database, table, connectionSupplier);
     }
 
     @Override
     public @Nullable List<T> execute() throws SQLException {
         List<T> result = new ArrayList<>();
-        Query<List<ReadableRow>> rowQuery = new BasicRowQuery<>(table, connectionSupplier)
+        Query<List<ReadableRow>> rowQuery = new BasicRowQuery<>(database, table, connectionSupplier)
                 .where(condition)
                 .orderBy(ordering)
                 .limit(limit);

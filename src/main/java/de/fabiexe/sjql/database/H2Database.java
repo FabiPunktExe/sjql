@@ -40,9 +40,19 @@ public class H2Database extends BasicDatabase {
     }
 
     @Override
+    public String escapeTableName(String name) {
+        return "\"" + name + "\"";
+    }
+
+    @Override
+    public String escapeColumnName(String name) {
+        return "\"" + name + "\"";
+    }
+
+    @Override
     public boolean tableExists(Table<?> table) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            String tableName = table.getName().toUpperCase();
+            String tableName = table.getName();
             String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '" + tableName + "'";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 try (ResultSet resultSet = statement.executeQuery()) {

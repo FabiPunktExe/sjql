@@ -2,6 +2,7 @@ package de.fabiexe.sjql.query;
 
 import de.fabiexe.sjql.Table;
 import de.fabiexe.sjql.column.Column;
+import de.fabiexe.sjql.database.BasicDatabase;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
 import de.fabiexe.sjql.row.BasicReadableRow;
@@ -28,11 +29,16 @@ public class BasicRowQuery<T extends @Nullable Object> extends BasicQuery<T, Lis
     /**
      * Creates a new row query for the given table.
      *
+     * @param database the database to query
      * @param table the table to query
      * @param connectionSupplier supplier for the database connection
      */
-    public BasicRowQuery(Table<T> table, ThrowingSupplier<Connection, SQLException> connectionSupplier) {
-        super(table, connectionSupplier);
+    public BasicRowQuery(
+            BasicDatabase database,
+            Table<T> table,
+            ThrowingSupplier<Connection, SQLException> connectionSupplier
+    ) {
+        super(database, table, connectionSupplier);
     }
 
     @Override
@@ -61,11 +67,12 @@ public class BasicRowQuery<T extends @Nullable Object> extends BasicQuery<T, Lis
     }
 
     private Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
-        StringBuilder sql = new StringBuilder("SELECT * FROM ").append(table.getName());
+        StringBuilder sql = new StringBuilder("SELECT * FROM ")
+                .append(database.escapeTableName(table.getName()));
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {
             sql.append(" WHERE ");
-            Map.Entry<String, List<ConstantExpression<?>>> conditionSql = SQLUtil.buildSql(condition);
+            Map.Entry<String, List<ConstantExpression<?>>> conditionSql = SQLUtil.buildSql(database, condition);
             sql.append(conditionSql.getKey());
             parameters.addAll(conditionSql.getValue());
         }
@@ -73,7 +80,7 @@ public class BasicRowQuery<T extends @Nullable Object> extends BasicQuery<T, Lis
             sql.append(" ORDER BY ");
             for (int i = 0; i < ordering.size(); i++) {
                 Map.Entry<Expression, Boolean> entry = ordering.get(i);
-                Map.Entry<String, List<ConstantExpression<?>>> orderSql = SQLUtil.buildSql(entry.getKey());
+                Map.Entry<String, List<ConstantExpression<?>>> orderSql = SQLUtil.buildSql(database, entry.getKey());
                 sql.append(orderSql.getKey()).append(entry.getValue() ? " ASC" : " DESC");
                 parameters.addAll(orderSql.getValue());
                 if (i < ordering.size() - 1) {

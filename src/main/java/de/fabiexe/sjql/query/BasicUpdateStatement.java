@@ -3,6 +3,7 @@ package de.fabiexe.sjql.query;
 import de.fabiexe.sjql.Table;
 import de.fabiexe.sjql.UpdateStatement;
 import de.fabiexe.sjql.column.Column;
+import de.fabiexe.sjql.database.BasicDatabase;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
 import de.fabiexe.sjql.expression.constant.NullExpression;
@@ -26,6 +27,7 @@ import java.util.function.Consumer;
  * @param <T> the type of the objects that represent rows in the target table
  */
 public class BasicUpdateStatement<T extends @Nullable Object> implements UpdateStatement {
+    private final BasicDatabase database;
     private final Table<T> table;
     private final ThrowingSupplier<Connection, SQLException> connectionSupplier;
     private final WritableRow row;
@@ -34,11 +36,18 @@ public class BasicUpdateStatement<T extends @Nullable Object> implements UpdateS
     /**
      * Creates a new update statement for the given table.
      *
+     * @param database the database to update rows in
      * @param table the table to update rows in
      * @param connectionSupplier supplier for the database connection
      * @param builder consumer that populates the values to update
      */
-    public BasicUpdateStatement(Table<T> table, ThrowingSupplier<Connection, SQLException> connectionSupplier, Consumer<WritableRow> builder) {
+    public BasicUpdateStatement(
+            BasicDatabase database,
+            Table<T> table,
+            ThrowingSupplier<Connection, SQLException> connectionSupplier,
+            Consumer<WritableRow> builder
+    ) {
+        this.database = database;
         this.table = table;
         this.connectionSupplier = connectionSupplier;
         this.row = new BasicWritableRow<>(table);
@@ -66,7 +75,9 @@ public class BasicUpdateStatement<T extends @Nullable Object> implements UpdateS
     }
 
     private Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
-        StringBuilder sql = new StringBuilder("UPDATE ").append(table.getName()).append(" SET ");
+        StringBuilder sql = new StringBuilder("UPDATE ")
+                .append(database.escapeTableName(table.getName()))
+                .append(" SET ");
         List<ConstantExpression<?>> parameters = new ArrayList<>();
 
         boolean first = true;
@@ -85,7 +96,7 @@ public class BasicUpdateStatement<T extends @Nullable Object> implements UpdateS
             } else {
                 sql.append(", ");
             }
-            sql.append(column.name()).append(" = ?");
+            sql.append(database.escapeColumnName(column.name())).append(" = ?");
             if (row.get(column) instanceof ConstantExpression<?> expression) {
                 parameters.add(expression);
             } else {
@@ -95,7 +106,7 @@ public class BasicUpdateStatement<T extends @Nullable Object> implements UpdateS
 
         if (condition != null) {
             sql.append(" WHERE ");
-            Map.Entry<String, List<ConstantExpression<?>>> conditionSql = SQLUtil.buildSql(condition);
+            Map.Entry<String, List<ConstantExpression<?>>> conditionSql = SQLUtil.buildSql(database, condition);
             sql.append(conditionSql.getKey());
             parameters.addAll(conditionSql.getValue());
         }

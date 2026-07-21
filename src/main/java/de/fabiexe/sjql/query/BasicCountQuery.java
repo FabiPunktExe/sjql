@@ -1,6 +1,7 @@
 package de.fabiexe.sjql.query;
 
 import de.fabiexe.sjql.Query;
+import de.fabiexe.sjql.database.BasicDatabase;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
 import de.fabiexe.sjql.util.SQLUtil;
 import org.jspecify.annotations.Nullable;
@@ -22,13 +23,14 @@ public class BasicCountQuery<T extends @Nullable Object> extends BasicQuery<T, L
     /**
      * Creates a count query that copies the modifiers from another query.
      *
+     * @param database the database to execute the query against
      * @param query the query whose modifiers should be copied
      */
-    public BasicCountQuery(BasicQuery<T, ?> query) {
-        super(query.table, query.connectionSupplier);
-        condition = query.condition;
-        ordering = query.ordering;
-        limit = query.limit;
+    public BasicCountQuery(BasicDatabase database, BasicQuery<T, ?> query) {
+        super(database, query.table, query.connectionSupplier);
+        this.condition = query.condition;
+        this.ordering = query.ordering;
+        this.limit = query.limit;
     }
 
     @Override
@@ -56,11 +58,11 @@ public class BasicCountQuery<T extends @Nullable Object> extends BasicQuery<T, L
     }
 
     private Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ").append(table.getName());
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ").append(database.escapeTableName(table.getName()));
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {
             sql.append(" WHERE ");
-            Map.Entry<String, List<ConstantExpression<?>>> conditionSql = SQLUtil.buildSql(condition);
+            Map.Entry<String, List<ConstantExpression<?>>> conditionSql = SQLUtil.buildSql(database, condition);
             sql.append(conditionSql.getKey());
             parameters.addAll(conditionSql.getValue());
         }

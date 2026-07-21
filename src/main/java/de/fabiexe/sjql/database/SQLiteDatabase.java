@@ -44,6 +44,16 @@ public class SQLiteDatabase extends BasicDatabase {
     }
 
     @Override
+    public String escapeTableName(String name) {
+        return "\""  + name + "\"";
+    }
+
+    @Override
+    public String escapeColumnName(String name) {
+        return "\"" + name + "\"";
+    }
+
+    @Override
     protected String getColumnType(Column<?> column) {
         return switch (column) {
             case IntColumn _, LongColumn _ -> "INTEGER";
