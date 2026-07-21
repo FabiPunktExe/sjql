@@ -5,5 +5,9 @@
     <file url="file://$PROJECT_DIR$/src/main/java/de/fabiexe/sjql/database/H2Database.java" dialect="H2" />
     <file url="file://$PROJECT_DIR$/src/main/java/de/fabiexe/sjql/database/PostgreSQLDatabase.java" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/de/fabiexe/sjql/database/SQLiteDatabase.java" dialect="SQLite" />
+    <file url="file://$PROJECT_DIR$/src/test/java/de/fabiexe/sjql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/test/java/de/fabiexe/sjql/database/AbstractDatabaseTest.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/test/java/de/fabiexe/sjql/database/H2Test.java" dialect="H2" />
+    <file url="file://$PROJECT_DIR$/src/test/java/de/fabiexe/sjql/database/SQLiteTest.java" dialect="SQLite" />
   </component>
 </project>

@@ -5,6 +5,7 @@ import de.fabiexe.sjql.database.H2Database;
 import de.fabiexe.sjql.expression.Expression;
 import kotlin.time.Clock;
 import org.h2.jdbcx.JdbcDataSource;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,19 +33,19 @@ public class TypesTest {
             kotlin.time.Instant kotlinInstantVal
     ) {
         public static final Table<AllTypes> TABLE = new Table<>(AllTypes.class, "all_types");
-        public static final Column<Integer> INT = TABLE.intColumn("int_val");
-        public static final Column<Long> LONG = TABLE.longColumn("long_val");
-        public static final Column<Float> FLOAT = TABLE.floatColumn("float_val");
-        public static final Column<Double> DOUBLE = TABLE.doubleColumn("double_val");
-        public static final Column<Boolean> BOOL = TABLE.booleanColumn("bool_val");
-        public static final Column<String> STRING = TABLE.stringColumn("string_val", 255);
-        public static final Column<UUID> UUID = TABLE.uuidColumn("uuid_val");
-        public static final Column<Instant> TIMESTAMP = TABLE.timestampColumn("timestamp_val");
-        public static final Column<kotlin.uuid.Uuid> KOTLIN_UUID = TableKt.kUuidColumn(TABLE, "kotlin_uuid_val");
-        public static final Column<kotlin.time.Instant> KOTLIN_INSTANT = TableKt.kTimestampColumn(TABLE, "kotlin_instant_val");
+        public static final Column<Integer> INT = TABLE.intColumn("int_val").notNull();
+        public static final Column<Long> LONG = TABLE.longColumn("long_val").notNull();
+        public static final Column<Float> FLOAT = TABLE.floatColumn("float_val").notNull();
+        public static final Column<Double> DOUBLE = TABLE.doubleColumn("double_val").notNull();
+        public static final Column<Boolean> BOOL = TABLE.booleanColumn("bool_val").notNull();
+        public static final Column<String> STRING = TABLE.stringColumn("string_val", 255).notNull();
+        public static final Column<UUID> UUID = TABLE.uuidColumn("uuid_val").notNull();
+        public static final Column<Instant> TIMESTAMP = TABLE.timestampColumn("timestamp_val").notNull();
+        public static final Column<kotlin.uuid.Uuid> KOTLIN_UUID = TableKt.kUuidColumn(TABLE, "kotlin_uuid_val").notNull();
+        public static final Column<kotlin.time.Instant> KOTLIN_INSTANT = TableKt.kTimestampColumn(TABLE, "kotlin_instant_val").notNull();
     }
 
-    private static Database database;
+    private static @Nullable Database database = null;
 
     @BeforeAll
     static void setup() throws SQLException {
@@ -69,7 +71,7 @@ public class TypesTest {
                 kotlin.time.jdk8.InstantConversionsJDK8Kt.toKotlinInstant(now)
         );
 
-        database.throwingTransaction(() -> {
+        Objects.requireNonNull(database).throwingTransaction(() -> {
             AllTypes.TABLE.insert(row -> {
                 row.set(AllTypes.LONG, item.longVal());
                 row.set(AllTypes.FLOAT, item.floatVal());
@@ -102,7 +104,7 @@ public class TypesTest {
 
     @Test
     void testInsertCurrentTimestamp() throws SQLException {
-        database.throwingTransaction(() -> {
+        Objects.requireNonNull(database).throwingTransaction(() -> {
             AllTypes.TABLE.insert(row -> {
                 row.set(AllTypes.LONG, 1L);
                 row.set(AllTypes.FLOAT, 1.0f);

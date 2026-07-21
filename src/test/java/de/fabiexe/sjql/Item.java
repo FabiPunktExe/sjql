@@ -7,5 +7,5 @@ import java.util.UUID;
 public record Item(int id, String name) {
     public static final Table<Item> TABLE = new Table<>(Item.class, "items");
     public static final Column<UUID> ID = TABLE.uuidColumn("id").primaryKey();
-    public static final Column<String> NAME = TABLE.stringColumn("name", 64);
+    public static final Column<String> NAME = TABLE.stringColumn("name", 64).notNull();
 }
