@@ -74,11 +74,13 @@ Tables are typically defined as static constants within a Java record or class.
 - Logical operators on `Expression`: `and`, `or`, `xor`, `not`.
 - Null checks: `checkNull()` (`IS NULL`) and `checkNotNull()` (`IS NOT NULL`).
 
-### 5. Primary Keys, Defaults & Nullability
+### 5. Primary Keys, Unique Keys, Defaults & Nullability
 - Use `.primaryKey()` to mark columns as primary keys. Primary keys are implicitly NOT NULL.
+- Use `.unique()` to mark a single column as a unique key.
+- Use `Table.unique(Column1, Column2, ...)` to define a composite unique key spanning multiple columns.
 - Use `.notNull()` to mark columns as NOT NULL explicitly.
 - During inserts, columns may be omitted if they have a default value, are auto-generated, or are nullable.
-- SQL generation for `createTable` includes `NOT NULL` constraints and `DEFAULT` clauses.
+- SQL generation for `createTable` includes `UNIQUE`, `NOT NULL` constraints and `DEFAULT` clauses.
 - `insert` validates that NOT NULL columns are not set to `null` and that required columns are provided.
 
 ### 6. Kotlin Support

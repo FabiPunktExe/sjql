@@ -25,6 +25,7 @@ public class Table<T extends @Nullable Object> {
     private final Class<T> type;
     private final String name;
     private final List<Column<?>> columns = new ArrayList<>();
+    private final List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
     private @Nullable Function<ReadableRow, T> rowMapper;
 
     /**
@@ -70,6 +71,42 @@ public class Table<T extends @Nullable Object> {
         columns.add(column);
         rowMapper = null;
         return column;
+    }
+
+    /**
+     * Defines a composite unique constraint over the given columns. The columns must belong to this table.
+     *
+     * @param columns The columns that form the unique constraint
+     * @return This table for chaining
+     * @throws IllegalArgumentException If no columns are provided
+     * @throws IllegalArgumentException If any column does not belong to this table
+     * @throws IllegalArgumentException If the same column is specified more than once
+     */
+    public Table<T> unique(Column<?>... columns) {
+        if (columns.length == 0) {
+            throw new IllegalArgumentException("Unique constraint must contain at least one column");
+        }
+        List<Column<?>> constraintColumns = new ArrayList<>();
+        for (Column<?> column : columns) {
+            if (!hasColumn(column)) {
+                throw new IllegalArgumentException("Column " + column.name() + " does not belong to table " + name);
+            }
+            if (constraintColumns.contains(column)) {
+                throw new IllegalArgumentException("Column " + column.name() + " is specified more than once in unique constraint");
+            }
+            constraintColumns.add(column);
+        }
+        uniqueConstraints.add(new UniqueConstraint(List.copyOf(constraintColumns)));
+        return this;
+    }
+
+    /**
+     * Gets the composite unique constraints defined for this table.
+     *
+     * @return The list of unique constraints defined for this table
+     */
+    public List<UniqueConstraint> getUniqueConstraints() {
+        return uniqueConstraints;
     }
 
     /**
@@ -343,4 +380,11 @@ public class Table<T extends @Nullable Object> {
     public boolean hasColumn(Column<?> column) {
         return columns.contains(column);
     }
+
+    /**
+     * Represents a composite unique constraint spanning one or more columns of this table.
+     *
+     * @param columns the columns that form the unique constraint
+     */
+    public record UniqueConstraint(List<Column<?>> columns) {}
 }

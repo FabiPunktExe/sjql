@@ -65,6 +65,20 @@ public sealed interface Column<T extends @Nullable Object> permits PrimitiveColu
     Column<@NonNull T> primaryKey();
 
     /**
+     * Checks if the column is a unique key.
+     *
+     * @return {@code true} if the column is a unique key, otherwise {@code false}
+     */
+    boolean isUnique();
+
+    /**
+     * Sets this column as a unique key.
+     *
+     * @return This column for chaining
+     */
+    Column<@NonNull T> unique();
+
+    /**
      * Checks if the column has a not-null constraint.
      *
      * @return {@code true} if the column has a not-null constraint, otherwise {@code false}

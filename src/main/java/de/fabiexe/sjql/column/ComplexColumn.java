@@ -97,6 +97,17 @@ public non-sealed abstract class ComplexColumn<T extends @Nullable Object, B ext
     }
 
     @Override
+    public boolean isUnique() {
+        return base.isUnique();
+    }
+
+    @Override
+    public Column<@NonNull T> unique() {
+        base.unique();
+        return this;
+    }
+
+    @Override
     public boolean isNotNull() {
         return base.isNotNull();
     }

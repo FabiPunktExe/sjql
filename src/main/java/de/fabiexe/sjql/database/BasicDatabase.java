@@ -90,6 +90,10 @@ public abstract class BasicDatabase implements Database {
                     sql.append(" NOT NULL");
                 }
 
+                if (column.isUnique() && !column.isPrimaryKey()) {
+                    sql.append(" UNIQUE");
+                }
+
                 Expression defaultValue = column.defaultValue();
                 if (defaultValue != null) {
                     sql.append(" DEFAULT ").append(SQLUtil.buildSqlWithoutPlaceholders(defaultValue));
@@ -105,6 +109,18 @@ public abstract class BasicDatabase implements Database {
                 for (int i = 0; i < primaryKeys.size(); i++) {
                     sql.append(primaryKeys.get(i).name());
                     if (i < primaryKeys.size() - 1) {
+                        sql.append(", ");
+                    }
+                }
+                sql.append(")");
+            }
+
+            for (Table.UniqueConstraint uniqueConstraint : table.getUniqueConstraints()) {
+                sql.append(", UNIQUE (");
+                List<Column<?>> constraintColumns = uniqueConstraint.columns();
+                for (int i = 0; i < constraintColumns.size(); i++) {
+                    sql.append(constraintColumns.get(i).name());
+                    if (i < constraintColumns.size() - 1) {
                         sql.append(", ");
                     }
                 }

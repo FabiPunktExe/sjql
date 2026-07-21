@@ -27,6 +27,9 @@ public abstract sealed class PrimitiveColumn<T extends @Nullable Object> impleme
     /** Whether this column is a primary key. */
     protected boolean isPrimaryKey = false;
 
+    /** Whether this column is a unique key. */
+    protected boolean isUnique = false;
+
     /** Whether this column has a not-null constraint. */
     protected boolean notNull = false;
 
@@ -69,6 +72,11 @@ public abstract sealed class PrimitiveColumn<T extends @Nullable Object> impleme
     }
 
     @Override
+    public boolean isUnique() {
+        return isUnique;
+    }
+
+    @Override
     public boolean isNotNull() {
         return notNull;
     }
@@ -82,6 +90,13 @@ public abstract sealed class PrimitiveColumn<T extends @Nullable Object> impleme
     @Override
     public PrimitiveColumn<@NonNull T> primaryKey() {
         isPrimaryKey = true;
+        notNull = true;
+        return this;
+    }
+
+    @Override
+    public PrimitiveColumn<@NonNull T> unique() {
+        isUnique = true;
         notNull = true;
         return this;
     }
