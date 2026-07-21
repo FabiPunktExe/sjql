@@ -4,8 +4,7 @@ import de.fabiexe.sjql.expression.constant.*;
 import de.fabiexe.sjql.expression.dynamic.CurrentTimestampExpression;
 import de.fabiexe.sjql.expression.logical.*;
 import kotlin.uuid.UuidKt;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -27,7 +26,7 @@ public interface Expression {
      * @return a {@link ConstantExpression} representing the value
      * @throws IllegalArgumentException if the value type is not supported
      */
-    static @NotNull Expression constant(@Nullable Object value) {
+    static Expression constant(@Nullable Object value) {
         return switch (value) {
             case null -> NullExpression.INSTANCE;
             case Integer i -> new IntExpression(i);
@@ -49,7 +48,7 @@ public interface Expression {
      *
      * @return a {@link CurrentTimestampExpression}
      */
-    static @NotNull Expression currentTimestamp() {
+    static Expression currentTimestamp() {
         return new CurrentTimestampExpression();
     }
 
@@ -59,7 +58,7 @@ public interface Expression {
      * @param other the expression to compare with
      * @return a new {@link EqualsExpression}
      */
-    default @NotNull Expression eq(@NotNull Expression other) {
+    default Expression eq(Expression other) {
         return new EqualsExpression(this, other);
     }
 
@@ -69,7 +68,7 @@ public interface Expression {
      * @param other the value to compare with, or {@code null}
      * @return a new {@link EqualsExpression}
      */
-    default @NotNull Expression eq(@Nullable Object other) {
+    default Expression eq(@Nullable Object other) {
         return eq(constant(other));
     }
 
@@ -79,7 +78,7 @@ public interface Expression {
      * @param other the expression to compare with
      * @return a new {@link NotEqualsExpression}
      */
-    default @NotNull Expression neq(@NotNull Expression other) {
+    default Expression neq(Expression other) {
         return new NotEqualsExpression(this, other);
     }
 
@@ -89,7 +88,7 @@ public interface Expression {
      * @param other the value to compare with, or {@code null}
      * @return a new {@link NotEqualsExpression}
      */
-    default @NotNull Expression neq(@Nullable Object other) {
+    default Expression neq(@Nullable Object other) {
         return neq(constant(other));
     }
 
@@ -99,7 +98,7 @@ public interface Expression {
      * @param other the expression to compare with
      * @return a new {@link GreaterThanExpression}
      */
-    default @NotNull Expression gt(@NotNull Expression other) {
+    default Expression gt(Expression other) {
         return new GreaterThanExpression(this, other);
     }
 
@@ -109,7 +108,7 @@ public interface Expression {
      * @param other the value to compare with, or {@code null}
      * @return a new {@link GreaterThanExpression}
      */
-    default @NotNull Expression gt(@Nullable Object other) {
+    default Expression gt(@Nullable Object other) {
         return gt(constant(other));
     }
 
@@ -119,7 +118,7 @@ public interface Expression {
      * @param other the expression to compare with
      * @return a new {@link GreaterThanOrEqualExpression}
      */
-    default @NotNull Expression gte(@NotNull Expression other) {
+    default Expression gte(Expression other) {
         return new GreaterThanOrEqualExpression(this, other);
     }
 
@@ -129,7 +128,7 @@ public interface Expression {
      * @param other the value to compare with, or {@code null}
      * @return a new {@link GreaterThanOrEqualExpression}
      */
-    default @NotNull Expression gte(@Nullable Object other) {
+    default Expression gte(@Nullable Object other) {
         return gte(constant(other));
     }
 
@@ -139,7 +138,7 @@ public interface Expression {
      * @param other the expression to compare with
      * @return a new {@link LessThanExpression}
      */
-    default @NotNull Expression lt(@NotNull Expression other) {
+    default Expression lt(Expression other) {
         return new LessThanExpression(this, other);
     }
 
@@ -149,7 +148,7 @@ public interface Expression {
      * @param other the value to compare with, or {@code null}
      * @return a new {@link LessThanExpression}
      */
-    default @NotNull Expression lt(@Nullable Object other) {
+    default Expression lt(@Nullable Object other) {
         return lt(constant(other));
     }
 
@@ -159,7 +158,7 @@ public interface Expression {
      * @param other the expression to compare with
      * @return a new {@link LessThanOrEqualExpression}
      */
-    default @NotNull Expression lte(@NotNull Expression other) {
+    default Expression lte(Expression other) {
         return new LessThanOrEqualExpression(this, other);
     }
 
@@ -169,7 +168,7 @@ public interface Expression {
      * @param other the value to compare with, or {@code null}
      * @return a new {@link LessThanOrEqualExpression}
      */
-    default @NotNull Expression lte(@Nullable Object other) {
+    default Expression lte(@Nullable Object other) {
         return lte(constant(other));
     }
 
@@ -179,7 +178,7 @@ public interface Expression {
      * @param other the expression to combine with
      * @return a new {@link AndExpression}
      */
-    default @NotNull Expression and(@NotNull Expression other) {
+    default Expression and(Expression other) {
         return new AndExpression(this, other);
     }
 
@@ -189,7 +188,7 @@ public interface Expression {
      * @param other the value to combine with, or {@code null}
      * @return a new {@link AndExpression}
      */
-    default @NotNull Expression and(@Nullable Object other) {
+    default Expression and(@Nullable Object other) {
         return and(constant(other));
     }
 
@@ -199,7 +198,7 @@ public interface Expression {
      * @param other the expression to combine with
      * @return a new {@link OrExpression}
      */
-    default @NotNull Expression or(@NotNull Expression other) {
+    default Expression or(Expression other) {
         return new OrExpression(this, other);
     }
 
@@ -209,7 +208,7 @@ public interface Expression {
      * @param other the value to combine with, or {@code null}
      * @return a new {@link OrExpression}
      */
-    default @NotNull Expression or(@Nullable Object other) {
+    default Expression or(@Nullable Object other) {
         return or(constant(other));
     }
 
@@ -219,7 +218,7 @@ public interface Expression {
      * @param other the expression to combine with
      * @return a new {@link XorExpression}
      */
-    default @NotNull Expression xor(@NotNull Expression other) {
+    default Expression xor(Expression other) {
         return new XorExpression(this, other);
     }
 
@@ -229,7 +228,7 @@ public interface Expression {
      * @param other the value to combine with, or {@code null}
      * @return a new {@link XorExpression}
      */
-    default @NotNull Expression xor(@Nullable Object other) {
+    default Expression xor(@Nullable Object other) {
         return xor(constant(other));
     }
 
@@ -238,7 +237,7 @@ public interface Expression {
      *
      * @return a new {@link NotExpression}
      */
-    default @NotNull Expression not() {
+    default Expression not() {
         return new NotExpression(this);
     }
 
@@ -247,7 +246,7 @@ public interface Expression {
      *
      * @return a new {@link IsNullExpression}
      */
-    default @NotNull Expression checkNull() {
+    default Expression checkNull() {
         return new IsNullExpression(this);
     }
 
@@ -256,7 +255,7 @@ public interface Expression {
      *
      * @return a new {@link IsNotNullExpression}
      */
-    default @NotNull Expression checkNotNull() {
+    default Expression checkNotNull() {
         return new IsNotNullExpression(this);
     }
 }

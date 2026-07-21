@@ -2,15 +2,15 @@ package de.fabiexe.sjql.column;
 
 import de.fabiexe.sjql.Table;
 import de.fabiexe.sjql.expression.Expression;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base implementation for primitive database columns.
  *
  * @param <T> the Java type of the column value
  */
-public abstract sealed class PrimitiveColumn<T> implements Column<T>
+public abstract sealed class PrimitiveColumn<T extends @Nullable Object> implements Column<T>
         permits BooleanColumn, DoubleColumn, FloatColumn, IntColumn, LongColumn, StringColumn, UUIDColumn, TimestampColumn {
     /** The table this column belongs to. */
     protected final Table<?> table;
@@ -22,7 +22,7 @@ public abstract sealed class PrimitiveColumn<T> implements Column<T>
     protected final Class<T> type;
 
     /** The optional default value expression. */
-    protected Expression defaultValue = null;
+    protected @Nullable Expression defaultValue = null;
 
     /** Whether this column is a primary key. */
     protected boolean isPrimaryKey = false;
@@ -37,24 +37,24 @@ public abstract sealed class PrimitiveColumn<T> implements Column<T>
      * @param name the column name
      * @param type the Java type of the column value
      */
-    public PrimitiveColumn(@NotNull Table<?> table, @NotNull String name, @NotNull Class<T> type) {
+    public PrimitiveColumn(Table<?> table, String name, Class<T> type) {
         this.table = table;
         this.name = name;
         this.type = type;
     }
 
     @Override
-    public @NotNull Table<?> table() {
+    public Table<?> table() {
         return table;
     }
 
     @Override
-    public @NotNull String name() {
+    public String name() {
         return name;
     }
 
     @Override
-    public @NotNull Class<T> type() {
+    public Class<T> type() {
         return type;
     }
 
@@ -74,20 +74,20 @@ public abstract sealed class PrimitiveColumn<T> implements Column<T>
     }
 
     @Override
-    public @NotNull PrimitiveColumn<T> defaultValue(@NotNull Expression defaultValue) {
+    public PrimitiveColumn<T> defaultValue(Expression defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
 
     @Override
-    public @NotNull PrimitiveColumn<@NotNull T> primaryKey() {
+    public PrimitiveColumn<@NonNull T> primaryKey() {
         isPrimaryKey = true;
         notNull = true;
         return this;
     }
 
     @Override
-    public @NotNull PrimitiveColumn<@NotNull T> notNull() {
+    public PrimitiveColumn<@NonNull T> notNull() {
         notNull = true;
         return this;
     }
@@ -103,7 +103,7 @@ public abstract sealed class PrimitiveColumn<T> implements Column<T>
      * @throws IllegalArgumentException if the type is not supported
      */
     @SuppressWarnings("unchecked")
-    public static <T> @NotNull PrimitiveColumn<T> create(@NotNull Class<T> type, @NotNull Table<?> table, @NotNull String name) {
+    public static <T extends @Nullable Object> PrimitiveColumn<T> create(Class<T> type, Table<?> table, String name) {
         return switch (type.getName()) {
             case "int", "java.lang.Integer" -> (PrimitiveColumn<T>) new IntColumn(table, name);
             case "double", "java.lang.Double" -> (PrimitiveColumn<T>) new DoubleColumn(table, name);

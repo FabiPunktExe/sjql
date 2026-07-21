@@ -3,7 +3,7 @@ package de.fabiexe.sjql.query;
 import de.fabiexe.sjql.Query;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
 import de.fabiexe.sjql.util.SQLUtil;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,13 +18,13 @@ import java.util.Map;
  *
  * @param <T> the type of the objects that represent rows in the queried table
  */
-public class BasicCountQuery<T> extends BasicQuery<T, Long> {
+public class BasicCountQuery<T extends @Nullable Object> extends BasicQuery<T, Long> {
     /**
      * Creates a count query that copies the modifiers from another query.
      *
      * @param query the query whose modifiers should be copied
      */
-    public BasicCountQuery(@NotNull BasicQuery<T, ?> query) {
+    public BasicCountQuery(BasicQuery<T, ?> query) {
         super(query.table, query.connectionSupplier);
         condition = query.condition;
         ordering = query.ordering;
@@ -32,12 +32,12 @@ public class BasicCountQuery<T> extends BasicQuery<T, Long> {
     }
 
     @Override
-    public @NotNull Query<Long> count() {
+    public Query<Long> count() {
         return new ConstantQuery<>(1L);
     }
 
     @Override
-    public @NotNull Long execute() throws SQLException {
+    public Long execute() throws SQLException {
         try (Connection connection = connectionSupplier.get()) {
             Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql();
             List<ConstantExpression<?>> parameters = sql.getValue();
@@ -55,7 +55,7 @@ public class BasicCountQuery<T> extends BasicQuery<T, Long> {
         }
     }
 
-    private @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
+    private Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ").append(table.getName());
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {

@@ -3,8 +3,7 @@ package de.fabiexe.sjql.row;
 import de.fabiexe.sjql.Table;
 import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.expression.Expression;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +13,7 @@ import java.util.Map;
  *
  * @param <T> the type of the objects that represent rows in the table
  */
-public class BasicWritableRow<T> implements WritableRow {
+public class BasicWritableRow<T extends @Nullable Object> implements WritableRow {
     private final Table<T> table;
     private final Map<Column<?>, Expression> values = new HashMap<>();
 
@@ -23,12 +22,12 @@ public class BasicWritableRow<T> implements WritableRow {
      *
      * @param table the table this row belongs to
      */
-    public BasicWritableRow(@NotNull Table<T> table) {
+    public BasicWritableRow(Table<T> table) {
         this.table = table;
     }
 
     @Override
-    public <U> void set(@NotNull Column<U> column, @NotNull Expression value) {
+    public <U extends @Nullable Object> void set(Column<U> column, Expression value) {
         if (table.hasColumn(column)) {
             values.put(column, value);
         } else {
@@ -37,7 +36,7 @@ public class BasicWritableRow<T> implements WritableRow {
     }
 
     @Override
-    public <U> @Nullable Expression get(@NotNull Column<U> column) {
+    public <U extends @Nullable Object> @Nullable Expression get(Column<U> column) {
         if (table.hasColumn(column)) {
             return values.getOrDefault(column, column.defaultValue());
         } else {
@@ -46,7 +45,7 @@ public class BasicWritableRow<T> implements WritableRow {
     }
 
     @Override
-    public boolean contains(@NotNull Column<?> column) {
+    public boolean contains(Column<?> column) {
         return table.hasColumn(column) && values.containsKey(column);
     }
 }

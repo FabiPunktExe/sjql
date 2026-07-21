@@ -1,7 +1,5 @@
 package de.fabiexe.sjql.expression.constant;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.UUID;
 
 /**
@@ -9,4 +7,4 @@ import java.util.UUID;
  *
  * @param value the UUID value
  */
-public record UUIDExpression(@NotNull UUID value) implements ConstantExpression<@NotNull UUID> {}
+public record UUIDExpression(UUID value) implements ConstantExpression<UUID> {}

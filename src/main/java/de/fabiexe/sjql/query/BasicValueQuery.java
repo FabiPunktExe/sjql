@@ -4,8 +4,7 @@ import de.fabiexe.sjql.Query;
 import de.fabiexe.sjql.Table;
 import de.fabiexe.sjql.row.ReadableRow;
 import de.fabiexe.sjql.util.ThrowingSupplier;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -17,7 +16,7 @@ import java.util.List;
  *
  * @param <T> the type of the objects that represent rows in the queried table
  */
-public class BasicValueQuery<T> extends BasicQuery<T, List<T>> {
+public class BasicValueQuery<T extends @Nullable Object> extends BasicQuery<T, List<T>> {
     /**
      * Creates a new value query for the given table.
      *
@@ -25,8 +24,8 @@ public class BasicValueQuery<T> extends BasicQuery<T, List<T>> {
      * @param connectionSupplier supplier for the database connection
      */
     public BasicValueQuery(
-            @NotNull Table<T> table,
-            @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier
+            Table<T> table,
+            ThrowingSupplier<Connection, SQLException> connectionSupplier
     ) {
         super(table, connectionSupplier);
     }
@@ -34,11 +33,11 @@ public class BasicValueQuery<T> extends BasicQuery<T, List<T>> {
     @Override
     public @Nullable List<T> execute() throws SQLException {
         List<T> result = new ArrayList<>();
-        Query<List<ReadableRow<T>>> rowQuery = new BasicRowQuery<>(table, connectionSupplier)
+        Query<List<ReadableRow>> rowQuery = new BasicRowQuery<>(table, connectionSupplier)
                 .where(condition)
                 .orderBy(ordering)
                 .limit(limit);
-        for (ReadableRow<T> row : rowQuery.executeNotNull()) {
+        for (ReadableRow row : rowQuery.executeNotNull()) {
             result.add(table.getRowMapper().apply(row));
         }
         return result;

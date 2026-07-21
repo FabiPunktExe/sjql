@@ -5,9 +5,10 @@ import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 import kotlin.time.toKotlinInstant
 
-class KTimestampColumn(table: Table<*>, name: String) : ComplexColumn<Instant?, java.time.Instant>(
-    Instant::class.java,
-    java.time.Instant::class.java,
+@Suppress("UNCHECKED_CAST")
+class KTimestampColumn(table: Table<*>, name: String) : ComplexColumn<Instant?, java.time.Instant?>(
+    Instant::class.java as Class<Instant?>,
+    java.time.Instant::class.java as Class<java.time.Instant?>,
     table,
     name
 ) {

@@ -10,7 +10,7 @@ import de.fabiexe.sjql.row.BasicWritableRow;
 import de.fabiexe.sjql.row.WritableRow;
 import de.fabiexe.sjql.util.SQLUtil;
 import de.fabiexe.sjql.util.ThrowingSupplier;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,11 +25,11 @@ import java.util.function.Consumer;
  *
  * @param <T> the type of the objects that represent rows in the target table
  */
-public class BasicUpdateStatement<T> implements UpdateStatement {
+public class BasicUpdateStatement<T extends @Nullable Object> implements UpdateStatement {
     private final Table<T> table;
     private final ThrowingSupplier<Connection, SQLException> connectionSupplier;
     private final WritableRow row;
-    private Expression condition = null;
+    private @Nullable Expression condition = null;
 
     /**
      * Creates a new update statement for the given table.
@@ -38,7 +38,7 @@ public class BasicUpdateStatement<T> implements UpdateStatement {
      * @param connectionSupplier supplier for the database connection
      * @param builder consumer that populates the values to update
      */
-    public BasicUpdateStatement(@NotNull Table<T> table, @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier, @NotNull Consumer<WritableRow> builder) {
+    public BasicUpdateStatement(Table<T> table, ThrowingSupplier<Connection, SQLException> connectionSupplier, Consumer<WritableRow> builder) {
         this.table = table;
         this.connectionSupplier = connectionSupplier;
         this.row = new BasicWritableRow<>(table);
@@ -46,7 +46,7 @@ public class BasicUpdateStatement<T> implements UpdateStatement {
     }
 
     @Override
-    public @NotNull UpdateStatement where(@NotNull Expression condition) {
+    public UpdateStatement where(Expression condition) {
         this.condition = condition;
         return this;
     }
@@ -65,7 +65,7 @@ public class BasicUpdateStatement<T> implements UpdateStatement {
         }
     }
 
-    private @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
+    private Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
         StringBuilder sql = new StringBuilder("UPDATE ").append(table.getName()).append(" SET ");
         List<ConstantExpression<?>> parameters = new ArrayList<>();
 

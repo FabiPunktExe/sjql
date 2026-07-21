@@ -1,7 +1,7 @@
 package de.fabiexe.sjql.row;
 
 import de.fabiexe.sjql.column.Column;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -12,7 +12,7 @@ import java.util.function.Function;
  *
  * @param <T> the type of the target object
  */
-public class ConstructorRowMapper<T> implements Function<ReadableRow<T>, T> {
+public class ConstructorRowMapper<T> implements Function<ReadableRow, T> {
     private final Column<?>[] columns;
     private final Constructor<T> constructor;
     private final ColumnMapper<?>[] columnMappers;
@@ -25,7 +25,7 @@ public class ConstructorRowMapper<T> implements Function<ReadableRow<T>, T> {
      * @throws IllegalArgumentException if no matching constructor can be found
      */
     @SuppressWarnings("unchecked")
-    public ConstructorRowMapper(@NotNull Class<T> type, @NotNull Column<?> @NotNull [] columns) {
+    public ConstructorRowMapper(Class<T> type, Column<?> [] columns) {
         Class<?>[] columnTypes = new Class<?>[columns.length];
         for (int i = 0; i < columns.length; i++) {
             columnTypes[i] = columns[i].type();
@@ -63,8 +63,8 @@ public class ConstructorRowMapper<T> implements Function<ReadableRow<T>, T> {
     }
 
     @Override
-    public T apply(ReadableRow<T> row) {
-        Object[] values = new Object[columns.length];
+    public T apply(ReadableRow row) {
+        @Nullable Object[] values = new @Nullable Object[columns.length];
         for (int i = 0; i < columns.length; i++) {
             values[i] = columnMappers[i].apply(row.get(columns[i]));
         }

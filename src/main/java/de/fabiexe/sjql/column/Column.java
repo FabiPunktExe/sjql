@@ -5,36 +5,35 @@ import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
 import de.fabiexe.sjql.expression.logical.IsNotNullExpression;
 import de.fabiexe.sjql.expression.logical.IsNullExpression;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a column in a {@link Table}.
  *
  * @param <T> the type of the column
  */
-public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
+public sealed interface Column<T extends @Nullable Object> permits PrimitiveColumn, ComplexColumn {
     /**
      * Gets the table this column belongs to.
      *
      * @return The table
      */
-    @NotNull Table<?> table();
+    Table<?> table();
 
     /**
      * Gets the name of the column.
      *
      * @return The name
      */
-    @NotNull String name();
+    String name();
 
     /**
      * Gets the type of the column.
      *
      * @return The type
      */
-    @NotNull Class<T> type();
+    Class<T> type();
 
     /**
      * Gets the default value of the column
@@ -49,8 +48,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param defaultValue The default value to set
      * @return This column for chaining
      */
-    @Contract("_ -> this")
-    @NotNull Column<T> defaultValue(@NotNull Expression defaultValue);
+    Column<T> defaultValue(Expression defaultValue);
 
     /**
      * Checks if the column is a primary key.
@@ -64,8 +62,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      *
      * @return This column for chaining
      */
-    @Contract("-> this")
-    @NotNull Column<@NotNull T> primaryKey();
+    Column<@NonNull T> primaryKey();
 
     /**
      * Checks if the column has a not-null constraint.
@@ -79,8 +76,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      *
      * @return This column for chaining
      */
-    @Contract("-> this")
-    @NotNull Column<@NotNull T> notNull();
+    Column<@NonNull T> notNull();
 
     /**
      * Sets the default value of the column to a constant value.
@@ -88,8 +84,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param defaultValue the default value to set
      * @return this column for chaining
      */
-    @Contract("_ -> this")
-    default @NotNull Column<T> defaultValue(@NotNull T defaultValue) {
+    default Column<T> defaultValue(T defaultValue) {
         return defaultValue(Expression.constant(defaultValue));
     }
 
@@ -99,7 +94,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the expression to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression eq(@NotNull Expression value) {
+    default Expression eq(Expression value) {
         return new ColumnExpression<>(this).eq(value);
     }
 
@@ -109,7 +104,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param other the column to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression eq(@NotNull Column<? extends T> other) {
+    default Expression eq(Column<? extends T> other) {
         return eq(new ColumnExpression<>(other));
     }
 
@@ -119,7 +114,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the value to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression eq(@NotNull T value) {
+    default Expression eq(T value) {
         return eq(Expression.constant(value));
     }
 
@@ -129,7 +124,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the expression to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression neq(@NotNull Expression value) {
+    default Expression neq(Expression value) {
         return new ColumnExpression<>(this).neq(value);
     }
 
@@ -139,7 +134,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param other the column to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression neq(@NotNull Column<? extends T> other) {
+    default Expression neq(Column<? extends T> other) {
         return neq(new ColumnExpression<>(other));
     }
 
@@ -149,7 +144,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the value to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression neq(@NotNull T value) {
+    default Expression neq(T value) {
         return neq(Expression.constant(value));
     }
 
@@ -159,7 +154,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the expression to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression gt(@NotNull Expression value) {
+    default Expression gt(Expression value) {
         return new ColumnExpression<>(this).gt(value);
     }
 
@@ -169,7 +164,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param other the column to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression gt(@NotNull Column<? extends T> other) {
+    default Expression gt(Column<? extends T> other) {
         return gt(new ColumnExpression<>(other));
     }
 
@@ -179,7 +174,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the value to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression gt(@NotNull T value) {
+    default Expression gt(T value) {
         return gt(Expression.constant(value));
     }
 
@@ -189,7 +184,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the expression to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression gte(@NotNull Expression value) {
+    default Expression gte(Expression value) {
         return new ColumnExpression<>(this).gte(value);
     }
 
@@ -199,7 +194,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param other the column to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression gte(@NotNull Column<? extends T> other) {
+    default Expression gte(Column<? extends T> other) {
         return gte(new ColumnExpression<>(other));
     }
 
@@ -209,7 +204,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the value to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression gte(@NotNull T value) {
+    default Expression gte(T value) {
         return gte(Expression.constant(value));
     }
 
@@ -219,7 +214,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the expression to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression lt(@NotNull Expression value) {
+    default Expression lt(Expression value) {
         return new ColumnExpression<>(this).lt(value);
     }
 
@@ -229,7 +224,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param other the column to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression lt(@NotNull Column<? extends T> other) {
+    default Expression lt(Column<? extends T> other) {
         return lt(new ColumnExpression<>(other));
     }
 
@@ -239,7 +234,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the value to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression lt(@NotNull T value) {
+    default Expression lt(T value) {
         return lt(Expression.constant(value));
     }
 
@@ -249,7 +244,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the expression to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression lte(@NotNull Expression value) {
+    default Expression lte(Expression value) {
         return new ColumnExpression<>(this).lte(value);
     }
 
@@ -259,7 +254,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param other the column to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression lte(@NotNull Column<? extends T> other) {
+    default Expression lte(Column<? extends T> other) {
         return lte(new ColumnExpression<>(other));
     }
 
@@ -269,7 +264,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      * @param value the value to compare with
      * @return a new {@link Expression}
      */
-    default @NotNull Expression lte(@NotNull T value) {
+    default Expression lte(T value) {
         return lte(Expression.constant(value));
     }
 
@@ -278,7 +273,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      *
      * @return a new {@link Expression}
      */
-    default @NotNull Expression checkNull() {
+    default Expression checkNull() {
         return new IsNullExpression(new ColumnExpression<>(this));
     }
 
@@ -287,7 +282,7 @@ public sealed interface Column<T> permits PrimitiveColumn, ComplexColumn {
      *
      * @return a new {@link Expression}
      */
-    default @NotNull Expression checkNotNull() {
+    default Expression checkNotNull() {
         return new IsNotNullExpression(new ColumnExpression<>(this));
     }
 }

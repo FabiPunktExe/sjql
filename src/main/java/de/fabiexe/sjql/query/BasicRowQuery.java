@@ -8,7 +8,7 @@ import de.fabiexe.sjql.row.BasicReadableRow;
 import de.fabiexe.sjql.row.ReadableRow;
 import de.fabiexe.sjql.util.SQLUtil;
 import de.fabiexe.sjql.util.ThrowingSupplier;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,19 +24,19 @@ import java.util.Map;
  *
  * @param <T> the type of the objects that represent rows in the queried table
  */
-public class BasicRowQuery<T> extends BasicQuery<T, List<ReadableRow<T>>> {
+public class BasicRowQuery<T extends @Nullable Object> extends BasicQuery<T, List<ReadableRow>> {
     /**
      * Creates a new row query for the given table.
      *
      * @param table the table to query
      * @param connectionSupplier supplier for the database connection
      */
-    public BasicRowQuery(@NotNull Table<T> table, @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier) {
+    public BasicRowQuery(Table<T> table, ThrowingSupplier<Connection, SQLException> connectionSupplier) {
         super(table, connectionSupplier);
     }
 
     @Override
-    public @NotNull List<ReadableRow<T>> execute() throws SQLException {
+    public List<ReadableRow> execute() throws SQLException {
         try (Connection connection = connectionSupplier.get()) {
             Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql();
             List<ConstantExpression<?>> parameters = sql.getValue();
@@ -45,9 +45,9 @@ public class BasicRowQuery<T> extends BasicQuery<T, List<ReadableRow<T>>> {
                     SQLUtil.setObject(statement, i + 1, parameters.get(i));
                 }
                 ResultSet resultSet = statement.executeQuery();
-                List<ReadableRow<T>> result = new ArrayList<>();
+                List<ReadableRow> result = new ArrayList<>();
                 while (resultSet.next()) {
-                    Map<Column<?>, Object> rowContent = new HashMap<>();
+                    Map<Column<?>, @Nullable Object> rowContent = new HashMap<>();
                     List<Column<?>> columns = table.getColumns();
                     for (int i = 0; i < columns.size(); i++) {
                         Column<?> column = columns.get(i);
@@ -60,7 +60,7 @@ public class BasicRowQuery<T> extends BasicQuery<T, List<ReadableRow<T>>> {
         }
     }
 
-    private @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
+    private Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
         StringBuilder sql = new StringBuilder("SELECT * FROM ").append(table.getName());
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {

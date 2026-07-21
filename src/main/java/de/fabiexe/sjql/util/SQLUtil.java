@@ -6,8 +6,7 @@ import de.fabiexe.sjql.expression.constant.*;
 import de.fabiexe.sjql.expression.dynamic.ColumnExpression;
 import de.fabiexe.sjql.expression.dynamic.CurrentTimestampExpression;
 import de.fabiexe.sjql.expression.logical.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.sql.*;
 import java.time.Instant;
@@ -30,7 +29,7 @@ public final class SQLUtil {
      * @param expression the constant expression
      * @throws SQLException if setting the parameter fails
      */
-    public static void setObject(@NotNull PreparedStatement statement, int index, @NotNull ConstantExpression<?> expression) throws SQLException {
+    public static void setObject(PreparedStatement statement, int index, ConstantExpression<?> expression) throws SQLException {
         switch (expression) {
             case NullExpression _ -> statement.setNull(index, Types.NULL);
             case IntExpression(Integer value) -> statement.setObject(index, value, Types.INTEGER);
@@ -55,7 +54,7 @@ public final class SQLUtil {
      * @throws SQLException if reading fails
      */
     @SuppressWarnings("unchecked")
-    public static <T> @Nullable T getObject(@NotNull ResultSet resultSet, int index, @NotNull Column<T> column) throws SQLException {
+    public static <T extends @Nullable Object> T getObject(ResultSet resultSet, int index, Column<T> column) throws SQLException {
         return (T) switch (column) {
             case IntColumn _ -> resultSet.getObject(index, Integer.class);
             case DoubleColumn _ -> resultSet.getObject(index, Double.class);
@@ -82,7 +81,7 @@ public final class SQLUtil {
      * @param expression the expression to convert
      * @return a pair of SQL text and the list of constant parameters
      */
-    public static @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql(@NotNull Expression expression) {
+    public static Map.Entry<String, List<ConstantExpression<?>>> buildSql(Expression expression) {
         return switch (expression) {
             case ConstantExpression<?> constantExpression -> Map.entry("?", List.of(constantExpression));
             case ColumnExpression<?> columnExpression -> Map.entry(columnExpression.column().name(), List.of());
@@ -169,7 +168,7 @@ public final class SQLUtil {
      * @param expression the expression to convert
      * @return the SQL text
      */
-    public static @NotNull String buildSqlWithoutPlaceholders(@NotNull Expression expression) {
+    public static String buildSqlWithoutPlaceholders(Expression expression) {
         return switch (expression) {
             case StringExpression stringExpression -> "'" + stringExpression.value().replaceAll("'", "''") + "'";
             case UUIDExpression uuidExpression -> "'" + uuidExpression.value() + "'";

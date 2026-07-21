@@ -6,7 +6,7 @@ import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
 import de.fabiexe.sjql.util.SQLUtil;
 import de.fabiexe.sjql.util.ThrowingSupplier;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,10 +20,10 @@ import java.util.Map;
  *
  * @param <T> the type of the objects that represent rows in the target table
  */
-public class BasicDeleteStatement<T> implements DeleteStatement {
+public class BasicDeleteStatement<T extends @Nullable Object> implements DeleteStatement {
     private final Table<T> table;
     private final ThrowingSupplier<Connection, SQLException> connectionSupplier;
-    private Expression condition = null;
+    private @Nullable Expression condition = null;
 
     /**
      * Creates a new delete statement for the given table.
@@ -31,13 +31,13 @@ public class BasicDeleteStatement<T> implements DeleteStatement {
      * @param table the table to delete rows from
      * @param connectionSupplier supplier for the database connection
      */
-    public BasicDeleteStatement(@NotNull Table<T> table, @NotNull ThrowingSupplier<Connection, SQLException> connectionSupplier) {
+    public BasicDeleteStatement(Table<T> table, ThrowingSupplier<Connection, SQLException> connectionSupplier) {
         this.table = table;
         this.connectionSupplier = connectionSupplier;
     }
 
     @Override
-    public @NotNull DeleteStatement where(@NotNull Expression condition) {
+    public DeleteStatement where(Expression condition) {
         this.condition = condition;
         return this;
     }
@@ -56,7 +56,7 @@ public class BasicDeleteStatement<T> implements DeleteStatement {
         }
     }
 
-    private @NotNull Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
+    private Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
         StringBuilder sql = new StringBuilder("DELETE FROM ").append(table.getName());
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {

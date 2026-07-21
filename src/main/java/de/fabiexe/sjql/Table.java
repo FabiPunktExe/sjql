@@ -5,8 +5,7 @@ import de.fabiexe.sjql.row.BasicWritableRow;
 import de.fabiexe.sjql.row.ConstructorRowMapper;
 import de.fabiexe.sjql.row.ReadableRow;
 import de.fabiexe.sjql.row.WritableRow;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -22,11 +21,11 @@ import java.util.function.Predicate;
  *
  * @param <T> The type of the objects that represent rows in this table.
  */
-public class Table<T> {
+public class Table<T extends @Nullable Object> {
     private final Class<T> type;
     private final String name;
     private final List<Column<?>> columns = new ArrayList<>();
-    private Function<ReadableRow<T>, T> rowMapper;
+    private @Nullable Function<ReadableRow, T> rowMapper;
 
     /**
      * Creates a new table with the given name, type, and row mapper.
@@ -37,9 +36,9 @@ public class Table<T> {
      *                  If {@code null}, a default constructor-based mapper will be used.
      */
     public Table(
-            @NotNull Class<T> type,
-            @NotNull String name,
-            @NotNull Function<ReadableRow<T>, T> rowMapper
+            Class<T> type,
+            String name,
+            @Nullable Function<ReadableRow, T> rowMapper
     ) {
         this.type = type;
         this.name = name;
@@ -52,13 +51,8 @@ public class Table<T> {
      * @param name The name of the table
      * @param type The class of the objects that represent rows in this table
      */
-    public Table(
-            @NotNull Class<T> type,
-            @NotNull String name
-    ) {
-        this.type = type;
-        this.name = name;
-        this.rowMapper = null;
+    public Table(Class<T> type, String name) {
+        this(type, name, null);
     }
 
     /**
@@ -69,7 +63,7 @@ public class Table<T> {
      * @return The added column
      * @throws IllegalArgumentException If a column with the same name already exists in this table
      */
-    public <U> @NotNull Column<U> column(@NotNull Column<U> column) {
+    public <U extends @Nullable Object> Column<U> column(Column<U> column) {
         if (columns.stream().map(Column::name).anyMatch(Predicate.isEqual(column.name()))) {
             throw new IllegalArgumentException("Column " + column.name() + " already exists in table " + name);
         }
@@ -84,7 +78,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<@Nullable Integer> intColumn(@NotNull String name) {
+    public Column<@Nullable Integer> intColumn(String name) {
         return column(new IntColumn(this, name));
     }
 
@@ -94,7 +88,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<@Nullable Double> doubleColumn(@NotNull String name) {
+    public Column<@Nullable Double> doubleColumn(String name) {
         return column(new DoubleColumn(this, name));
     }
 
@@ -105,7 +99,7 @@ public class Table<T> {
      * @param length The maximum length of the string
      * @return The added column
      */
-    public @NotNull Column<@Nullable String> stringColumn(@NotNull String name, int length) {
+    public Column<@Nullable String> stringColumn(String name, int length) {
         return column(new StringColumn(this, name, length));
     }
 
@@ -115,7 +109,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<@Nullable Long> longColumn(@NotNull String name) {
+    public Column<@Nullable Long> longColumn(String name) {
         return column(new LongColumn(this, name));
     }
 
@@ -125,7 +119,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<@Nullable Float> floatColumn(@NotNull String name) {
+    public Column<@Nullable Float> floatColumn(String name) {
         return column(new FloatColumn(this, name));
     }
 
@@ -135,7 +129,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<@Nullable Boolean> booleanColumn(@NotNull String name) {
+    public Column<@Nullable Boolean> booleanColumn(String name) {
         return column(new BooleanColumn(this, name));
     }
 
@@ -145,7 +139,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<@Nullable UUID> uuidColumn(@NotNull String name) {
+    public Column<@Nullable UUID> uuidColumn(String name) {
         return column(new UUIDColumn(this, name));
     }
 
@@ -155,7 +149,7 @@ public class Table<T> {
      * @param name The name of the column
      * @return The added column
      */
-    public @NotNull Column<@Nullable Instant> timestampColumn(@NotNull String name) {
+    public Column<@Nullable Instant> timestampColumn(String name) {
         return column(new TimestampColumn(this, name));
     }
 
@@ -167,7 +161,7 @@ public class Table<T> {
      * @throws SQLException If an SQL error occurs during insertion
      * @see Database#transaction(Runnable)
      */
-    public void insert(@NotNull Consumer<WritableRow> builder) throws SQLException {
+    public void insert(Consumer<WritableRow> builder) throws SQLException {
         if (!Database.CURRENT_DATABASE.isBound()) {
             throw new IllegalStateException("This method can only be called inside a transaction");
         }
@@ -183,7 +177,7 @@ public class Table<T> {
      * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
-    public @NotNull DeleteStatement delete() {
+    public DeleteStatement delete() {
         if (!Database.CURRENT_DATABASE.isBound()) {
             throw new IllegalStateException("This method can only be called inside a transaction");
         }
@@ -199,7 +193,7 @@ public class Table<T> {
      * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
-    public @NotNull UpdateStatement update(@NotNull Consumer<WritableRow> builder) {
+    public UpdateStatement update(Consumer<WritableRow> builder) {
         if (!Database.CURRENT_DATABASE.isBound()) {
             throw new IllegalStateException("This method can only be called inside a transaction");
         }
@@ -217,7 +211,7 @@ public class Table<T> {
      * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
-    public <U> @NotNull UpdateStatement update(@NotNull Column<U> column, U value) {
+    public <U extends @Nullable Object> UpdateStatement update(Column<U> column, U value) {
         return update(row -> row.set(column, value));
     }
 
@@ -235,9 +229,9 @@ public class Table<T> {
      * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
-    public <U, V> @NotNull UpdateStatement update(
-            @NotNull Column<U> column1, U value1,
-            @NotNull Column<V> column2, V value2
+    public <U extends @Nullable Object, V extends @Nullable Object> UpdateStatement update(
+            Column<U> column1, U value1,
+            Column<V> column2, V value2
     ) {
         return update(row -> {
             row.set(column1, value1);
@@ -262,10 +256,10 @@ public class Table<T> {
      * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
-    public <U, V, W> @NotNull UpdateStatement update(
-            @NotNull Column<U> column1, U value1,
-            @NotNull Column<V> column2, V value2,
-            @NotNull Column<W> column3, W value3
+    public <U extends @Nullable Object, V extends @Nullable Object, W extends @Nullable Object> UpdateStatement update(
+            Column<U> column1, U value1,
+            Column<V> column2, V value2,
+            Column<W> column3, W value3
     ) {
         return update(row -> {
             row.set(column1, value1);
@@ -281,7 +275,7 @@ public class Table<T> {
      * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
-    public @NotNull Query<List<T>> select() {
+    public Query<List<T>> select() {
         if (!Database.CURRENT_DATABASE.isBound()) {
             throw new IllegalStateException("This method can only be called inside a transaction");
         }
@@ -305,7 +299,7 @@ public class Table<T> {
      *
      * @return The class of the objects that represent rows in this table
      */
-    public @NotNull Class<T> getType() {
+    public Class<T> getType() {
         return type;
     }
 
@@ -314,7 +308,7 @@ public class Table<T> {
      *
      * @return The name of this table
      */
-    public @NotNull String getName() {
+    public String getName() {
         return name;
     }
 
@@ -324,7 +318,7 @@ public class Table<T> {
      *
      * @return The function that maps a readable row to an object of type {@code T}
      */
-    public @NotNull Function<ReadableRow<T>, T> getRowMapper() {
+    public Function<ReadableRow, T> getRowMapper() {
         if (rowMapper == null) {
             rowMapper = new ConstructorRowMapper<>(type, columns.toArray(Column<?>[]::new));
         }
@@ -336,7 +330,7 @@ public class Table<T> {
      *
      * @return The list of columns defined for this table
      */
-    public @NotNull List<Column<?>> getColumns() {
+    public List<Column<?>> getColumns() {
         return columns;
     }
 
@@ -346,7 +340,7 @@ public class Table<T> {
      * @param column The column to check
      * @return {@code true} if this table has the given column, {@code false} otherwise
      */
-    public boolean hasColumn(@NotNull Column<?> column) {
+    public boolean hasColumn(Column<?> column) {
         return columns.contains(column);
     }
 }

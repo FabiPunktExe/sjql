@@ -1,15 +1,10 @@
 package de.fabiexe.sjql.row;
 
 import de.fabiexe.sjql.column.Column;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * A read-only view of a database row.
- *
- * @param <T> the type of the objects that represent rows in the table
- */
-public interface ReadableRow<T> {
+/** A read-only view of a database row. */
+public interface ReadableRow {
     /**
      * Gets the value of the given column from this row.
      *
@@ -17,7 +12,7 @@ public interface ReadableRow<T> {
      * @param column the column to read
      * @return the column value, or {@code null} if the column value is SQL {@code NULL}
      */
-    <U> @Nullable U get(@NotNull Column<U> column);
+    <U extends @Nullable Object> U get(Column<U> column);
 
     /**
      * Checks whether this row contains a value for the given column.
@@ -25,5 +20,5 @@ public interface ReadableRow<T> {
      * @param column the column to check
      * @return {@code true} if the column has a value in this row
      */
-    boolean contains(@NotNull Column<?> column);
+    boolean contains(Column<?> column);
 }

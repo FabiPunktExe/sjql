@@ -6,7 +6,7 @@ import de.fabiexe.sjql.database.SQLiteDatabase;
 import de.fabiexe.sjql.row.ReadableRow;
 import de.fabiexe.sjql.row.WritableRow;
 import de.fabiexe.sjql.util.ThrowingRunnable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -33,7 +33,7 @@ public interface Database {
      * @param table The table definition to create
      * @throws SQLException If a database error occurs
      */
-    void createTable(@NotNull Table<?> table) throws SQLException;
+    void createTable(Table<?> table) throws SQLException;
 
     /**
      * Deletes the specified table from the database. If the table does not exist, no action is taken.
@@ -41,7 +41,7 @@ public interface Database {
      * @param table The table to delete
      * @throws SQLException If a database error occurs
      */
-    void deleteTable(@NotNull Table<?> table) throws SQLException;
+    void deleteTable(Table<?> table) throws SQLException;
 
     /**
      * Checks if the specified table exists in the database.
@@ -50,7 +50,7 @@ public interface Database {
      * @return {@code true} if the table exists, {@code false} otherwise
      * @throws SQLException If a database error occurs
      */
-    boolean tableExists(@NotNull Table<?> table) throws SQLException;
+    boolean tableExists(Table<?> table) throws SQLException;
 
     /**
      * Inserts a new row into the specified table.
@@ -60,7 +60,7 @@ public interface Database {
      * @param row The row data to insert
      * @throws SQLException If a database error occurs
      */
-    <T> void insert(@NotNull Table<T> table, @NotNull WritableRow row) throws SQLException;
+    <T extends @Nullable Object> void insert(Table<T> table, WritableRow row) throws SQLException;
 
     /**
      * Deletes rows from the specified table.
@@ -69,7 +69,7 @@ public interface Database {
      * @param table The table to delete rows from
      * @return A {@link DeleteStatement} that can be used to specify and execute the operation
      */
-    <T> @NotNull DeleteStatement delete(@NotNull Table<T> table);
+    <T extends @Nullable Object> DeleteStatement delete(Table<T> table);
 
     /**
      * Updates rows in the specified table based on the given condition and update values.
@@ -80,7 +80,7 @@ public interface Database {
      *                It receives a {@link WritableRow} that can be used to set the new values for the columns.
      * @return An {@link UpdateStatement} that can be used to specify and execute the operation
      */
-    <T> @NotNull UpdateStatement update(@NotNull Table<T> table, @NotNull Consumer<WritableRow> builder);
+    <T extends @Nullable Object> UpdateStatement update(Table<T> table, Consumer<WritableRow> builder);
 
     /**
      * Creates a new {@link Query} for selecting rows from the specified table.
@@ -89,7 +89,7 @@ public interface Database {
      * @param table The table to select rows from
      * @return A {@link Query} that can be used to specify and execute the selection operation
      */
-    <T> @NotNull Query<List<ReadableRow<T>>> selectRows(@NotNull Table<T> table);
+    <T extends @Nullable Object> Query<List<ReadableRow>> selectRows(Table<T> table);
 
     /**
      * Creates a new {@link Query} for selecting objects of type {@code T} from the specified table.
@@ -98,14 +98,14 @@ public interface Database {
      * @param table The table to select objects from
      * @return A {@link Query} that can be used to specify and execute the selection operation
      */
-    <T> @NotNull Query<List<T>> select(@NotNull Table<T> table);
+    <T extends @Nullable Object> Query<List<T>> select(Table<T> table);
 
     /**
      * Executes the given action within a transaction.
      *
      * @param action The action to execute within the transaction
      */
-    default void transaction(@NotNull Runnable action) {
+    default void transaction(Runnable action) {
         ScopedValue.where(CURRENT_DATABASE, this).run(action);
     }
 
@@ -116,7 +116,7 @@ public interface Database {
      * @param action The action to execute within the transaction
      * @throws T If the action throws an exception of type T
      */
-    default <T extends Throwable> void throwingTransaction(@NotNull ThrowingRunnable<T> action) throws T {
+    default <T extends Throwable> void throwingTransaction(ThrowingRunnable<T> action) throws T {
         ScopedValue.where(CURRENT_DATABASE, this).call(() -> {
             action.run();
             return null;
@@ -130,7 +130,7 @@ public interface Database {
      * @param action The action to execute within the transaction
      * @return The result of the action
      */
-    default <T> T transaction(@NotNull Supplier<T> action) {
+    default <T extends @Nullable Object> T transaction(Supplier<T> action) {
         return ScopedValue.where(CURRENT_DATABASE, this).call(action::get);
     }
 
@@ -143,7 +143,7 @@ public interface Database {
      * @return The result of the action
      * @throws E If the action throws an exception of type E
      */
-    default <T, E extends Throwable> T throwingTransaction(@NotNull ScopedValue.CallableOp<T, E> action) throws E {
+    default <T extends @Nullable Object, E extends Throwable> T throwingTransaction(ScopedValue.CallableOp<T, E> action) throws E {
         return ScopedValue.where(CURRENT_DATABASE, this).call(action);
     }
 
@@ -155,7 +155,7 @@ public interface Database {
      * @throws IllegalArgumentException If the data source is not supported
      * @throws SQLException If a database access error occurs
      */
-    static @NotNull Database create(@NotNull DataSource dataSource) throws SQLException {
+    static Database create(DataSource dataSource) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             String url = connection.getMetaData().getURL();
             if (url.startsWith("jdbc:sqlite:")) {

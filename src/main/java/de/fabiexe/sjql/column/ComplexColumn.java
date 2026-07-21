@@ -2,8 +2,8 @@ package de.fabiexe.sjql.column;
 
 import de.fabiexe.sjql.Table;
 import de.fabiexe.sjql.expression.Expression;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A column that maps a complex Java type to a primitive database column.
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
  * @param <T> the complex Java type
  * @param <B> the primitive base type stored in the database
  */
-public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
+public non-sealed abstract class ComplexColumn<T extends @Nullable Object, B extends @Nullable Object> implements Column<T> {
     private final Class<T> type;
     private final Column<B> base;
 
@@ -21,7 +21,7 @@ public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
      * @param type the complex Java type
      * @param base the primitive base column
      */
-    public ComplexColumn(@NotNull Class<T> type, @NotNull Column<B> base) {
+    public ComplexColumn(Class<T> type, Column<B> base) {
         this.type = type;
         this.base = base;
     }
@@ -35,10 +35,10 @@ public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
      * @param name the column name
      */
     public ComplexColumn(
-            @NotNull Class<T> type,
-            @NotNull Class<B> primitiveType,
-            @NotNull Table<?> table,
-            @NotNull String name
+            Class<T> type,
+            Class<B> primitiveType,
+            Table<?> table,
+            String name
     ) {
         this(type, PrimitiveColumn.create(primitiveType, table, name));
     }
@@ -49,7 +49,7 @@ public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
      * @param value the primitive value
      * @return the complex value
      */
-    public abstract T toComplex(B value);
+    public abstract @Nullable T toComplex(@Nullable B value);
 
     /**
      * Converts a complex value to the primitive database type.
@@ -57,20 +57,20 @@ public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
      * @param value the complex value
      * @return the primitive value
      */
-    public abstract B toBase(T value);
+    public abstract @Nullable B toBase(@Nullable T value);
 
     @Override
-    public @NotNull Table<?> table() {
+    public Table<?> table() {
         return base.table();
     }
 
     @Override
-    public @NotNull String name() {
+    public String name() {
         return base.name();
     }
 
     @Override
-    public @NotNull Class<T> type() {
+    public Class<T> type() {
         return type;
     }
 
@@ -80,7 +80,7 @@ public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
     }
 
     @Override
-    public @NotNull Column<T> defaultValue(@NotNull Expression defaultValue) {
+    public Column<T> defaultValue(Expression defaultValue) {
         base.defaultValue(defaultValue);
         return this;
     }
@@ -91,7 +91,7 @@ public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
     }
 
     @Override
-    public @NotNull Column<T> primaryKey() {
+    public Column<@NonNull T> primaryKey() {
         base.primaryKey();
         return this;
     }
@@ -102,7 +102,7 @@ public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
     }
 
     @Override
-    public @NotNull Column<T> notNull() {
+    public Column<@NonNull T> notNull() {
         base.notNull();
         return this;
     }
@@ -112,7 +112,7 @@ public non-sealed abstract class ComplexColumn<T, B> implements Column<T> {
      *
      * @return The base column
      */
-    public @NotNull Column<B> getBase() {
+    public Column<B> getBase() {
         return base;
     }
 }

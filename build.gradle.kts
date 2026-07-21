@@ -20,8 +20,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.annotations)
-    testCompileOnly(libs.annotations)
+    api(libs.jspecify)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.h2)
     testImplementation(libs.sqlite)

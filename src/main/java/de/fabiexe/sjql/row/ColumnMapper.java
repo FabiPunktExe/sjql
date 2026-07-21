@@ -1,8 +1,7 @@
 package de.fabiexe.sjql.row;
 
 import de.fabiexe.sjql.column.Column;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -11,7 +10,7 @@ import java.util.function.Function;
  *
  * @param <T> the target type of the mapping
  */
-public class ColumnMapper<T> implements Function<@Nullable Object, T> {
+public class ColumnMapper<T extends @Nullable Object> implements Function<@Nullable Object, T> {
     private final Column<T> column;
 
     /**
@@ -21,7 +20,7 @@ public class ColumnMapper<T> implements Function<@Nullable Object, T> {
      * @param column the column providing the raw value
      * @throws IllegalArgumentException if the column type is not assignable to the parameter type
      */
-    public ColumnMapper(@NotNull Class<?> type, @NotNull Column<T> column) {
+    public ColumnMapper(Class<?> type, Column<T> column) {
         if (type.isPrimitive()) {
             type = primitiveToWrapper(type);
         }

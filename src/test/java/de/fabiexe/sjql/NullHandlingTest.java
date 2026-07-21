@@ -3,8 +3,7 @@ package de.fabiexe.sjql;
 import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.database.H2Database;
 import org.h2.jdbcx.JdbcDataSource;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,10 +19,10 @@ public class NullHandlingTest {
     private Database database;
     private DataSource dataSource;
 
-    public record TestRecord(int id, @NotNull String name, @Nullable String description) {
+    public record TestRecord(int id, String name, @Nullable String description) {
         public static final Table<TestRecord> TABLE = new Table<>(TestRecord.class, "test_nulls");
-        public static final Column<@NotNull Integer> ID = TABLE.intColumn("id").primaryKey();
-        public static final Column<@NotNull String> NAME = TABLE.stringColumn("name", 64).notNull();
+        public static final Column<Integer> ID = TABLE.intColumn("id").primaryKey();
+        public static final Column<String> NAME = TABLE.stringColumn("name", 64).notNull();
         public static final Column<@Nullable String> DESCRIPTION = TABLE.stringColumn("description", 64);
     }
 
