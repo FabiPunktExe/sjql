@@ -12,6 +12,8 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -110,6 +112,27 @@ public interface Database {
     }
 
     /**
+     * Executes the given action within a transaction.
+     *
+     * @param action The action to execute within the transaction
+     * @return A completable future that completes when the transaction is finished
+     */
+    default CompletableFuture<Void> asyncTransaction(Runnable action) {
+        return CompletableFuture.runAsync(() -> transaction(action));
+    }
+
+    /**
+     * Executes the given action within a transaction.
+     *
+     * @param action The action to execute within the transaction
+     * @param executor The executor to run the action on
+     * @return A completable future that completes when the transaction is finished
+     */
+    default CompletableFuture<Void> asyncTransaction(Runnable action, Executor executor) {
+        return CompletableFuture.runAsync(() -> transaction(action), executor);
+    }
+
+    /**
      * Executes the given action within a transaction, allowing it to throw a checked exception.
      *
      * @param <T> The type of the exception that may be thrown by the action
@@ -124,6 +147,49 @@ public interface Database {
     }
 
     /**
+     * Executes the given action within a transaction.
+     *
+     * @param <T> The type of the exception that may be thrown by the action
+     * @param action The action to execute within the transaction
+     * @return A completable future that completes when the transaction is finished
+     */
+    default <T extends Throwable> CompletableFuture<Void> asyncThrowingTransaction(ThrowingRunnable<T> action) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                throwingTransaction(action);
+            } catch (Throwable throwable) {
+                if (throwable instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                } else {
+                    throw new RuntimeException(throwable);
+                }
+            }
+        });
+    }
+
+    /**
+     * Executes the given action within a transaction.
+     *
+     * @param <E> The type of the exception that may be thrown by the action
+     * @param action The action to execute within the transaction
+     * @param executor The executor to run the action on
+     * @return A completable future that completes when the transaction is finished
+     */
+    default <E extends Throwable> CompletableFuture<Void> asyncThrowingTransaction(ThrowingRunnable<E> action, Executor executor) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                throwingTransaction(action);
+            } catch (Throwable throwable) {
+                if (throwable instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                } else {
+                    throw new RuntimeException(throwable);
+                }
+            }
+        }, executor);
+    }
+
+    /**
      * Executes the given action within a transaction and returns its result.
      *
      * @param <T> The type of the result returned by the action
@@ -132,6 +198,29 @@ public interface Database {
      */
     default <T extends @Nullable Object> T transaction(Supplier<T> action) {
         return ScopedValue.where(CURRENT_DATABASE, this).call(action::get);
+    }
+
+    /**
+     * Executes the given action within a transaction and returns its result.
+     *
+     * @param <T> The type of the result returned by the action
+     * @param action The action to execute within the transaction
+     * @return The completable future returning the result of the action
+     */
+    default <T extends @Nullable Object> CompletableFuture<T> asyncTransaction(Supplier<T> action) {
+        return CompletableFuture.supplyAsync(() -> transaction(action));
+    }
+
+    /**
+     * Executes the given action within a transaction and returns its result.
+     *
+     * @param <T> The type of the result returned by the action
+     * @param action The action to execute within the transaction
+     * @param executor The executor to run the action on
+     * @return The completable future returning the result of the action
+     */
+    default <T extends @Nullable Object> CompletableFuture<T> asyncTransaction(Supplier<T> action, Executor executor) {
+        return CompletableFuture.supplyAsync(() -> transaction(action), executor);
     }
 
     /**
@@ -145,6 +234,51 @@ public interface Database {
      */
     default <T extends @Nullable Object, E extends Throwable> T throwingTransaction(ScopedValue.CallableOp<T, E> action) throws E {
         return ScopedValue.where(CURRENT_DATABASE, this).call(action);
+    }
+
+    /**
+     * Executes the given action within a transaction, allowing it to throw a checked exception, and returns its result.
+     *
+     * @param <T> The type of the result returned by the action
+     * @param <E> The type of the exception that may be thrown by the action
+     * @param action The action to execute within the transaction
+     * @return A completable future returning the result of the action
+     */
+    default <T extends @Nullable Object, E extends Throwable> CompletableFuture<T> asyncThrowingTransaction(ScopedValue.CallableOp<T, E> action) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return throwingTransaction(action);
+            } catch (Throwable throwable) {
+                if (throwable instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                } else {
+                    throw new RuntimeException(throwable);
+                }
+            }
+        });
+    }
+
+    /**
+     * Executes the given action within a transaction, allowing it to throw a checked exception, and returns its result.
+     *
+     * @param <T> The type of the result returned by the action
+     * @param <E> The type of the exception that may be thrown by the action
+     * @param action The action to execute within the transaction
+     * @param executor The executor to run the action on
+     * @return A completable future returning the result of the action
+     */
+    default <T extends @Nullable Object, E extends Throwable> CompletableFuture<T> asyncThrowingTransaction(ScopedValue.CallableOp<T, E> action, Executor executor) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return throwingTransaction(action);
+            } catch (Throwable throwable) {
+                if (throwable instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                } else {
+                    throw new RuntimeException(throwable);
+                }
+            }
+        }, executor);
     }
 
     /**
