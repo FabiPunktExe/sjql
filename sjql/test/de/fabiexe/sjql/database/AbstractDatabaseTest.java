@@ -3,6 +3,8 @@ package de.fabiexe.sjql.database;
 import de.fabiexe.sjql.Coffee;
 import de.fabiexe.sjql.CompositeKey;
 import de.fabiexe.sjql.Database;
+import de.fabiexe.sjql.Table;
+import de.fabiexe.sjql.column.Column;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,12 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AbstractDatabaseTest {
+    public record AutoIncrement(int id, String name) {
+        public static final Table<AutoIncrement> TABLE = new Table<>(AutoIncrement.class, "auto_increment_test");
+        public static final Column<Integer> ID = TABLE.intColumn("id").primaryKey();
+        public static final Column<String> NAME = TABLE.stringColumn("name", 64).notNull();
+    }
+
     protected Database database;
 
     protected abstract DataSource createDataSource() throws SQLException;
@@ -43,6 +51,52 @@ public abstract class AbstractDatabaseTest {
 
         List<Coffee> coffees = database.throwingTransaction(() -> Coffee.TABLE.select().execute());
         assertEquals(List.of(new Coffee("Espresso", 2.5)), coffees);
+    }
+
+    @Test
+    public void testInsertReturningGeneratedKey() throws SQLException {
+        database.deleteTable(AutoIncrement.TABLE);
+        database.createTable(AutoIncrement.TABLE);
+        try {
+            int firstId = database.throwingTransaction(() ->
+                    AutoIncrement.TABLE.insertReturning(
+                            AutoIncrement.ID,
+                            row -> row.set(AutoIncrement.NAME, "first")
+                    )
+            );
+            int secondId = database.throwingTransaction(() ->
+                    AutoIncrement.TABLE.insertReturning(
+                            AutoIncrement.ID,
+                            row -> row.set(AutoIncrement.NAME, "second")
+                    )
+            );
+
+            assertTrue(firstId > 0);
+            assertTrue(secondId > firstId);
+        } finally {
+            database.deleteTable(AutoIncrement.TABLE);
+        }
+    }
+
+    @Test
+    public void testInsertReturningDefaultValue() throws SQLException {
+        double price = database.throwingTransaction(() -> Coffee.TABLE.insertReturning(
+                Coffee.PRICE,
+                row -> row.set(Coffee.NAME, "Americano") // default price: 4.5
+        ));
+        assertEquals(4.5, price, 0.0001);
+    }
+
+    @Test
+    public void testInsertReturningExplicitValue() throws SQLException {
+        String name = database.throwingTransaction(() -> Coffee.TABLE.insertReturning(
+                Coffee.NAME,
+                row -> {
+                    row.set(Coffee.NAME, "Latte");
+                    row.set(Coffee.PRICE, 3.5);
+                }
+        ));
+        assertEquals("Latte", name);
     }
 
     @Test

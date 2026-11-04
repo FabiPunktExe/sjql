@@ -1,0 +1,20 @@
+product: jvm/lib
+
+apply: 
+  - //publishing.module-template.yaml
+
+settings:
+  kotlin:
+    version: 2.4.20
+
+dependencies:
+  - org.jetbrains.kotlin:kotlin-stdlib:2.4.20: compile-only
+  - $libs.jspecify: exported
+
+test-dependencies:
+  - //sjql-kotlin
+  - $libs.junit.jupiter
+  - $libs.h2
+  - $libs.sqlite
+  - $libs.postgresql
+  - $libs.junit.platform.launcher: runtime-only

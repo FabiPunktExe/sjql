@@ -208,6 +208,31 @@ public class Table<T extends @Nullable Object> {
     }
 
     /**
+     * Inserts a new row into this table and returns the value of the given column for the inserted row.
+     * This method may only be used inside a transaction.
+     *
+     * @param <U> The type of the column whose value should be returned
+     * @param column The column whose value should be returned
+     * @param builder A consumer that builds the row to be inserted
+     * @return The value of the given column for the inserted row, or {@code null} if the column value is {@code NULL}
+     * @throws IllegalStateException If this method is not called inside a transaction
+     * @throws IllegalArgumentException If the column does not belong to this table
+     * @throws SQLException If an SQL error occurs during insertion
+     * @see Database#transaction(Runnable)
+     */
+    public <U extends @Nullable Object> U insertReturning(
+            Column<U> column,
+            Consumer<WritableRow> builder
+    ) throws SQLException {
+        if (!Database.CURRENT_DATABASE.isBound()) {
+            throw new IllegalStateException("This method can only be called inside a transaction");
+        }
+        WritableRow row = new BasicWritableRow<>(this);
+        builder.accept(row);
+        return Database.CURRENT_DATABASE.get().insertReturning(this, row, column);
+    }
+
+    /**
      * Deletes rows from this table. This method may only be used inside a transaction.
      *
      * @return A {@link DeleteStatement} that can be used to specify and execute the delete operation
@@ -386,5 +411,6 @@ public class Table<T extends @Nullable Object> {
      *
      * @param columns the columns that form the unique constraint
      */
-    public record UniqueConstraint(List<Column<?>> columns) {}
+    public record UniqueConstraint(List<Column<?>> columns) {
+    }
 }

@@ -17,6 +17,7 @@ import org.jspecify.annotations.Nullable;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -173,6 +174,50 @@ public abstract class BasicDatabase implements Database {
 
     @Override
     public <T extends @Nullable Object> void insert(Table<T> table, WritableRow row) throws SQLException {
+        validateRow(table, row);
+        InsertSql insertSql = buildInsertSql(table, row);
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(insertSql.sql())) {
+            bindParameters(statement, insertSql.parameters());
+            statement.executeUpdate();
+        }
+    }
+
+    @Override
+    public <T extends @Nullable Object, U extends @Nullable Object> U insertReturning(
+            Table<T> table,
+            WritableRow row,
+            Column<U> column
+    ) throws SQLException {
+        if (!table.hasColumn(column)) {
+            throw new IllegalArgumentException("Column " + column.name() + " does not belong to table " + table.getName());
+        }
+
+        validateRow(table, row);
+        InsertSql insertSql = buildInsertSql(table, row);
+        String sql = buildReturningSql(insertSql.sql(), column);
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            bindParameters(statement, insertSql.parameters());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    throw new SQLException("Insert did not return a value for column " + column.name());
+                }
+                return SQLUtil.getObject(resultSet, 1, column);
+            }
+        }
+    }
+
+    /**
+     * Validates that all required columns of the given table are set in the row.
+     *
+     * @param table The table
+     * @param row The row to validate
+     * @throws IllegalArgumentException If a {@code NOT NULL} column is set to {@code null} or a required column is missing
+     */
+    protected void validateRow(Table<?> table, WritableRow row) {
         for (Column<?> column : table.getColumns()) {
             if (column.isNotNull()) {
                 if (row.get(column) instanceof NullExpression) {
@@ -183,53 +228,82 @@ public abstract class BasicDatabase implements Database {
                 }
             }
         }
+    }
 
-        try (Connection connection = dataSource.getConnection()) {
-            StringBuilder sql = new StringBuilder("INSERT INTO ")
-                    .append(escapeTableName(table.getName()))
-                    .append(" (");
+    /**
+     * Builds the parameterized {@code INSERT} statement for the given row.
+     *
+     * @param table The table
+     * @param row The row to insert
+     * @return The SQL text and its parameters
+     */
+    protected InsertSql buildInsertSql(Table<?> table, WritableRow row) {
+        StringBuilder sql = new StringBuilder("INSERT INTO ")
+                .append(escapeTableName(table.getName()))
+                .append(" (");
 
-            boolean first = true;
-            for (Column<?> column : table.getColumns()) {
-                if (!row.contains(column)) {
-                    continue;
-                }
-                if (first) {
-                    first = false;
-                } else {
-                    sql.append(", ");
-                }
-                sql.append(escapeColumnName(column.name()));
+        boolean first = true;
+        for (Column<?> column : table.getColumns()) {
+            if (!row.contains(column)) {
+                continue;
             }
-
-            sql.append(") VALUES (");
-
-            List<ConstantExpression<?>> parameters = new ArrayList<>();
-            first = true;
-            for (Column<?> column : table.getColumns()) {
-                if (!row.contains(column)) {
-                    continue;
-                }
-                if (first) {
-                    first = false;
-                } else {
-                    sql.append(", ");
-                }
-                Expression expression = Objects.requireNonNull(row.get(column));
-                Map.Entry<String, List<ConstantExpression<?>>> sqlEntry = SQLUtil.buildSql(this, expression);
-                sql.append(sqlEntry.getKey());
-                parameters.addAll(sqlEntry.getValue());
+            if (first) {
+                first = false;
+            } else {
+                sql.append(", ");
             }
-
-            sql.append(");");
-
-            try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
-                for (int i = 0; i < parameters.size(); i++) {
-                    SQLUtil.setObject(statement, i + 1, parameters.get(i));
-                }
-                statement.executeUpdate();
-            }
+            sql.append(escapeColumnName(column.name()));
         }
+
+        sql.append(") VALUES (");
+
+        List<ConstantExpression<?>> parameters = new ArrayList<>();
+        first = true;
+        for (Column<?> column : table.getColumns()) {
+            if (!row.contains(column)) {
+                continue;
+            }
+            if (first) {
+                first = false;
+            } else {
+                sql.append(", ");
+            }
+            Expression expression = Objects.requireNonNull(row.get(column));
+            Map.Entry<String, List<ConstantExpression<?>>> sqlEntry = SQLUtil.buildSql(this, expression);
+            sql.append(sqlEntry.getKey());
+            parameters.addAll(sqlEntry.getValue());
+        }
+
+        sql.append(")");
+        return new InsertSql(sql.toString(), List.copyOf(parameters));
+    }
+
+    /**
+     * Wraps the given insert statement so that the value of the given column is returned.
+     * The default implementation appends a {@code RETURNING} clause, which is supported by
+     * PostgreSQL and SQLite. Databases with different syntax can override this method.
+     *
+     * @param insertSql The insert statement without a trailing semicolon
+     * @param column The column whose value should be returned
+     * @return The SQL statement that returns the column value
+     */
+    protected String buildReturningSql(String insertSql, Column<?> column) {
+        return insertSql + " RETURNING " + escapeColumnName(column.name());
+    }
+
+    private static void bindParameters(PreparedStatement statement, List<ConstantExpression<?>> parameters) throws SQLException {
+        for (int i = 0; i < parameters.size(); i++) {
+            SQLUtil.setObject(statement, i + 1, parameters.get(i));
+        }
+    }
+
+    /**
+     * Parameterized SQL for an insert statement.
+     *
+     * @param sql The SQL text
+     * @param parameters The constant expressions to bind as parameters
+     */
+    protected record InsertSql(String sql, List<ConstantExpression<?>> parameters) {
     }
 
     @Override

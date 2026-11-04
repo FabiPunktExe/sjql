@@ -1,0 +1,8 @@
+product: jvm/lib
+
+apply: 
+  - //publishing.module-template.yaml
+
+dependencies:
+  - //sjql
+  - $libs.kotlinx.coroutines.core

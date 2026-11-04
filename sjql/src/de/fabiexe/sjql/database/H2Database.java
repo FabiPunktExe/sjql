@@ -40,6 +40,11 @@ public class H2Database extends BasicDatabase {
     }
 
     @Override
+    protected String buildReturningSql(String insertSql, Column<?> column) {
+        return "SELECT " + escapeColumnName(column.name()) + " FROM FINAL TABLE (" + insertSql + ")";
+    }
+
+    @Override
     public String escapeTableName(String name) {
         return "\"" + name + "\"";
     }

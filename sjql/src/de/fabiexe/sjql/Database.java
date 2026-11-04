@@ -1,5 +1,6 @@
 package de.fabiexe.sjql;
 
+import de.fabiexe.sjql.column.Column;
 import de.fabiexe.sjql.database.H2Database;
 import de.fabiexe.sjql.database.PostgreSQLDatabase;
 import de.fabiexe.sjql.database.SQLiteDatabase;
@@ -63,6 +64,24 @@ public interface Database {
      * @throws SQLException If a database error occurs
      */
     <T extends @Nullable Object> void insert(Table<T> table, WritableRow row) throws SQLException;
+
+    /**
+     * Inserts a new row into the specified table and returns the value of the given column for the inserted row.
+     *
+     * @param <T> The type of the objects that represent rows in the table
+     * @param <U> The type of the column whose value should be returned
+     * @param table The table to insert the row into
+     * @param row The row data to insert
+     * @param column The column whose value should be returned
+     * @return The value of the given column for the inserted row, or {@code null} if the column value is {@code NULL}
+     * @throws IllegalArgumentException If the column does not belong to the table
+     * @throws SQLException If a database error occurs
+     */
+    <T extends @Nullable Object, U extends @Nullable Object> U insertReturning(
+            Table<T> table,
+            WritableRow row,
+            Column<U> column
+    ) throws SQLException;
 
     /**
      * Deletes rows from the specified table.

@@ -70,6 +70,10 @@ public void example() throws SQLException {
             row.set(Coffee.PRICE, 2.5);
         });
 
+        Coffee.TABLE.insertReturning(Coffee.PRICE, row -> {
+            row.set(Coffee.NAME, "Americano");
+        }); // 4.5
+
         List<Coffee> coffees = Coffee.TABLE.select()
                 .where(Coffee.NAME.eq("Espresso"))
                 .execute(); // [Coffee[name=Espresso, price=2.5]]
