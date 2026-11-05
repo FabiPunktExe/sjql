@@ -113,6 +113,16 @@ public interface Database {
     <T extends @Nullable Object> Query<List<ReadableRow>> selectRows(Table<T> table);
 
     /**
+     * Combines the specified tables and creates a new {@link Query} for selecting rows from the combination.
+     *
+     * @param first The first table to select rows from
+     * @param others The other tables to combine with the first one
+     * @return A {@link Query} that can be used to specify and execute the selection operation
+     * @throws IllegalArgumentException If two references share the same qualifier
+     */
+    Query<List<ReadableRow>> combine(TableRef<?> first, TableRef<?>... others);
+
+    /**
      * Creates a new {@link Query} for selecting objects of type {@code T} from the specified table.
      *
      * @param <T> The type of the objects that represent rows in the table

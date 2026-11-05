@@ -64,7 +64,26 @@ Tables are typically defined as static constants within a Java record or class.
   - `execute()` returns the result (may be `null`)
   - `executeNotNull()` returns a non-null result or throws `NullPointerException`
 
-### 4. Expressions
+### 4. Combining Tables (Implicit Joins)
+- Multiple tables can be combined in one query without SQL `JOIN` syntax: they are listed comma-separated in `FROM`, and the join condition is expressed in `WHERE`.
+- `Table.ref()` returns an unaliased `TableRef<T>`; `Table.alias("c")` returns an aliased one.
+- `TableRef.column(Column)` returns a `ColumnRef<T>`, which is an `Expression` and renders qualified as `"alias"."column"`.
+- `TableRef.selectRows(otherRef, ...)` (or `Database.selectRows(TableRef, TableRef...)`) returns a `Query<List<ReadableRow>>`.
+- `ReadableRow.get(ColumnRef)` reads a qualified value. `ReadableRow.get(Column)` works when the column belongs to exactly one of the referenced tables; it throws on ambiguity (self-joins require `ColumnRef`).
+- Plain `Column` expressions are automatically qualified when the query has an alias or more than one table, as long as the owning table is unique. Existing single-table, unaliased queries keep rendering unqualified columns.
+- Aliases must be unique per query; duplicate qualifiers are rejected with `IllegalArgumentException`.
+- Example:
+  ```java
+  TableRef<Coffee> c = Coffee.TABLE.alias("c");
+  TableRef<Purchase> p = Purchase.TABLE.alias("p");
+  List<ReadableRow> rows = c.selectRows(p)
+          .where(c.column(Coffee.NAME).eq(p.column(Purchase.COFFEE_NAME)))
+          .executeNotNull();
+  // SELECT * FROM "coffee" AS "c", "purchase" AS "p" WHERE ("c"."name") = ("p"."coffee_name")
+  String name = rows.getFirst().get(c.column(Coffee.NAME));
+  ```
+
+### 5. Expressions
 - Expressions are built via `Expression.constant(value)` or column helpers.
 - Supported constant types: `null`, `Integer`, `Long`, `Float`, `Double`, `Boolean`, `String`, `UUID`, `Instant`, and Kotlin counterparts (`kotlin.uuid.Uuid`, `kotlin.time.Instant`).
 - `Expression.currentTimestamp()` evaluates to the database's `CURRENT_TIMESTAMP`.
@@ -72,7 +91,7 @@ Tables are typically defined as static constants within a Java record or class.
 - Logical operators on `Expression`: `and`, `or`, `xor`, `not`.
 - Null checks: `checkNull()` (`IS NULL`) and `checkNotNull()` (`IS NOT NULL`).
 
-### 5. Primary Keys, Unique Keys, Defaults & Nullability
+### 6. Primary Keys, Unique Keys, Defaults & Nullability
 - Use `.primaryKey()` to mark columns as primary keys. Primary keys are implicitly NOT NULL.
 - Use `.unique()` to mark a single column as a unique key.
 - Use `Table.unique(Column1, Column2, ...)` to define a composite unique key spanning multiple columns.
@@ -83,35 +102,36 @@ Tables are typically defined as static constants within a Java record or class.
 - `Table.insertReturning(Column, Consumer<WritableRow>)` inserts a row and returns the value of the given column for the inserted row. This includes database-generated values (e.g. auto-increment primary keys) and column defaults. `Database.insertReturning(Table, WritableRow, Column)` is the corresponding database-level operation.
 - `insertReturning` is implemented with `INSERT ... RETURNING` for SQLite and PostgreSQL and with `SELECT ... FROM FINAL TABLE (INSERT ...)` for H2 (`BasicDatabase.buildReturningSql`).
 
-### 6. Kotlin Support
+### 7. Kotlin Support
 - Kotlin extension functions provide idiomatic infix syntax for comparisons and query building.
 - `Column` infix operators: `eq`, `neq`, `gt`, `gte`, `lt`, `lte`.
 - `Expression` infix operators: `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `and`, `or`, `xor`.
 - `Query` extensions: infix `where`, `orderBy`, `limit`.
+- `TableRef` operator: `tableRef[column]` returns a `ColumnRef<T>`.
 - Kotlin-specific column types:
   - `Table.kUuidColumn(name)` maps `kotlin.uuid.Uuid` to/from `java.util.UUID`.
   - `Table.kTimestampColumn(name)` maps `kotlin.time.Instant` to/from `java.time.Instant`.
-- The Kotlin module is located in `sjql/src`.
+- The Kotlin module is located in `sjql-kotlin/src`; the Java core is in `sjql/src`.
 
 ## Architecture Details
 
 - **Package Structure:**
-  - `de.fabiexe.sjql`: Core interfaces and classes (`Table`, `Database`, `Query`, `Statement`, `DeleteStatement`, `UpdateStatement`).
-  - `de.fabiexe.sjql.column`: Column definitions. `Column<T>` is a `sealed interface` permitting `PrimitiveColumn` and `ComplexColumn`.
+  - `de.fabiexe.sjql`: Core interfaces and classes (`Table`, `TableRef`, `Database`, `Query`, `Statement`, `DeleteStatement`, `UpdateStatement`).
+  - `de.fabiexe.sjql.column`: Column definitions. `Column<T>` is a `sealed interface` permitting `PrimitiveColumn` and `ComplexColumn`; `ColumnRef<T>` is a qualified column reference.
   - `de.fabiexe.sjql.database`: Database-specific implementations (`BasicDatabase`, `H2Database`, `SQLiteDatabase`, `PostgreSQLDatabase`).
   - `de.fabiexe.sjql.expression`: `Expression` interface and operator API.
   - `de.fabiexe.sjql.expression.constant`: Constant value expressions (`IntExpression`, `StringExpression`, `UUIDExpression`, etc.).
   - `de.fabiexe.sjql.expression.dynamic`: Dynamic expressions (`ColumnExpression`, `CurrentTimestampExpression`).
   - `de.fabiexe.sjql.expression.logical`: Logical and comparison expressions (`AndExpression`, `EqualsExpression`, `IsNullExpression`, etc.).
   - `de.fabiexe.sjql.query`: Query and statement implementations (`BasicQuery`, `BasicValueQuery`, `BasicRowQuery`, `BasicCountQuery`, `BasicDeleteStatement`, `BasicUpdateStatement`, `ConstantQuery`).
-  - `de.fabiexe.sjql.row`: Row mapping (`ReadableRow`, `WritableRow`, `BasicReadableRow`, `BasicWritableRow`, `ConstructorRowMapper`, `ColumnMapper`).
+  - `de.fabiexe.sjql.row`: Row mapping (`ReadableRow`, `WritableRow`, `BasicReadableRow`, `BasicMultiTableRow`, `BasicWritableRow`, `ConstructorRowMapper`, `ColumnMapper`).
   - `de.fabiexe.sjql.util`: Utilities (`SQLUtil`, `ThrowingRunnable`, `ThrowingSupplier`).
 
 - **Type Safety:** The library relies heavily on Java generics to ensure that column types match the expected Java types. All packages are annotated with JSpecify `@NullMarked` for explicit nullability.
 
 - **Null Safety:** The project uses JSpecify annotations (`@Nullable`, `@NonNull`, `@NullMarked`). Kotlin callers use platform types accordingly.
 
-- **SQL Generation:** `SQLUtil` is a utility class for generating parameterized SQL strings and setting JDBC parameters.
+- **SQL Generation:** `SQLUtil` is a utility class for generating parameterized SQL strings and setting JDBC parameters. `buildFromClause` renders the comma-separated `FROM` list, and the table-aware `buildSql` overload qualifies plain columns automatically.
 
 - **Column Types:**
   - Primitive columns stored directly in the database: `IntColumn`, `LongColumn`, `FloatColumn`, `DoubleColumn`, `BooleanColumn`, `StringColumn`, `UUIDColumn`, `TimestampColumn`.

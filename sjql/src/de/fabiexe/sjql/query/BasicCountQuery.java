@@ -4,7 +4,6 @@ import de.fabiexe.sjql.Query;
 import de.fabiexe.sjql.database.BasicDatabase;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
 import de.fabiexe.sjql.util.SQLUtil;
-import org.jspecify.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,20 +13,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A query that counts the number of matching rows.
- *
- * @param <T> the type of the objects that represent rows in the queried table
- */
-public class BasicCountQuery<T extends @Nullable Object> extends BasicQuery<T, Long> {
+/** A query that counts the number of matching rows. */
+public class BasicCountQuery extends BasicQuery<Long> {
     /**
      * Creates a count query that copies the modifiers from another query.
      *
      * @param database the database to execute the query against
      * @param query the query whose modifiers should be copied
      */
-    public BasicCountQuery(BasicDatabase database, BasicQuery<T, ?> query) {
-        super(database, query.table, query.connectionSupplier);
+    public BasicCountQuery(BasicDatabase database, BasicQuery<?> query) {
+        super(database, query.tables, query.connectionSupplier);
         this.condition = query.condition;
         this.ordering = query.ordering;
         this.limit = query.limit;
@@ -58,7 +53,7 @@ public class BasicCountQuery<T extends @Nullable Object> extends BasicQuery<T, L
     }
 
     private Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ").append(database.escapeTableName(table.getName()));
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ").append(SQLUtil.buildFromClause(database, tables));
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {
             sql.append(" WHERE ");

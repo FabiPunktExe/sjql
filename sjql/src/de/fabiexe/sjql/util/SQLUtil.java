@@ -1,5 +1,6 @@
 package de.fabiexe.sjql.util;
 
+import de.fabiexe.sjql.TableRef;
 import de.fabiexe.sjql.column.*;
 import de.fabiexe.sjql.database.BasicDatabase;
 import de.fabiexe.sjql.expression.Expression;
@@ -40,7 +41,8 @@ public final class SQLUtil {
             case FloatExpression(Float value) -> statement.setObject(index, value, Types.FLOAT);
             case BooleanExpression(Boolean value) -> statement.setObject(index, value, Types.BOOLEAN);
             case UUIDExpression(UUID value) -> statement.setObject(index, value, Types.OTHER);
-            case TimestampExpression(Instant value) -> statement.setObject(index, Timestamp.from(value), Types.TIMESTAMP);
+            case TimestampExpression(Instant value) ->
+                    statement.setObject(index, Timestamp.from(value), Types.TIMESTAMP);
         }
     }
 
@@ -56,6 +58,9 @@ public final class SQLUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T extends @Nullable Object> T getObject(ResultSet resultSet, int index, Column<T> column) throws SQLException {
+        if (resultSet.getObject(index) == null) {
+            return null;
+        }
         return (T) switch (column) {
             case IntColumn _ -> resultSet.getObject(index, Integer.class);
             case DoubleColumn _ -> resultSet.getObject(index, Double.class);
@@ -65,7 +70,7 @@ public final class SQLUtil {
             case BooleanColumn _ -> resultSet.getObject(index, Boolean.class);
             case UUIDColumn _ -> resultSet.getObject(index, UUID.class);
             case TimestampColumn _ -> {
-                Timestamp timestamp = resultSet.getObject(index, Timestamp.class);
+                Timestamp timestamp = resultSet.<@Nullable Timestamp>getObject(index, Timestamp.class);
                 yield timestamp == null ? null : timestamp.toInstant();
             }
             case ComplexColumn<?, ?> complexColumn -> {
@@ -86,10 +91,9 @@ public final class SQLUtil {
     public static Map.Entry<String, List<ConstantExpression<?>>> buildSql(BasicDatabase database, Expression expression) {
         return switch (expression) {
             case ConstantExpression<?> constantExpression -> Map.entry("?", List.of(constantExpression));
-            case ColumnExpression<?> columnExpression -> {
-                String name = database.escapeColumnName(columnExpression.column().name());
-                yield Map.entry(name, List.of());
-            }
+            case ColumnExpression<?> columnExpression ->
+                    Map.entry(columnToSql(database, columnExpression.column()), List.of());
+            case ColumnRef<?> columnRef -> Map.entry(columnToSql(database, columnRef), List.of());
             case CurrentTimestampExpression _ -> Map.entry("CURRENT_TIMESTAMP", List.of());
             case NotExpression notExpression -> {
                 Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(database, notExpression.expression());
@@ -144,7 +148,8 @@ public final class SQLUtil {
                         b = right;
                         operator = "XOR";
                     }
-                    default -> throw new IllegalArgumentException("Unsupported logical expression type: " + expression.getClass().getName());
+                    default ->
+                            throw new IllegalArgumentException("Unsupported logical expression type: " + expression.getClass().getName());
                 }
                 Map.Entry<String, List<ConstantExpression<?>>> aSql = buildSql(database, a);
                 Map.Entry<String, List<ConstantExpression<?>>> bSql = buildSql(database, b);
@@ -162,8 +167,38 @@ public final class SQLUtil {
                 Map.Entry<String, List<ConstantExpression<?>>> sql = buildSql(database, inner);
                 yield Map.entry("(" + sql.getKey() + ") IS NOT NULL", sql.getValue());
             }
-            default -> throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
+            default ->
+                    throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
         };
+    }
+
+    /**
+     * Builds the comma-separated {@code FROM} clause for the given table references.
+     *
+     * @param database the database to use for name escaping
+     * @param tables the table references to render
+     * @return the SQL text of the {@code FROM} clause contents
+     */
+    public static String buildFromClause(BasicDatabase database, List<TableRef<?>> tables) {
+        StringBuilder sql = new StringBuilder();
+        for (int i = 0; i < tables.size(); i++) {
+            if (i > 0) {
+                sql.append(", ");
+            }
+            TableRef<?> table = tables.get(i);
+            sql.append(database.escapeTableName(table.getTable().getName()));
+            String alias = table.getAlias();
+            if (alias != null) {
+                sql.append(" AS ").append(database.escapeTableName(alias));
+            }
+        }
+        return sql.toString();
+    }
+
+    public static String columnToSql(BasicDatabase database, ColumnRef<?> columnRef) {
+        String tableQualifier = database.escapeTableName(columnRef.getTableRef().getQualifier());
+        String columnName = database.escapeColumnName(columnRef.name());
+        return tableQualifier + "." + columnName;
     }
 
     /**
@@ -181,7 +216,8 @@ public final class SQLUtil {
             case TimestampExpression timestampExpression -> "'" + timestampExpression.value() + "'";
             case NullExpression _ -> "NULL";
             case ConstantExpression<?> constantExpression -> String.valueOf(constantExpression.value());
-            case ColumnExpression<?> columnExpression -> database.escapeColumnName(columnExpression.column().name());
+            case ColumnExpression<?> columnExpression -> columnToSql(database, columnExpression.column());
+            case ColumnRef<?> columnRef -> columnToSql(database, columnRef);
             case CurrentTimestampExpression _ -> "CURRENT_TIMESTAMP";
             case NotExpression notExpression -> {
                 String sql = buildSqlWithoutPlaceholders(database, notExpression.expression());
@@ -236,15 +272,18 @@ public final class SQLUtil {
                         b = right;
                         operator = "XOR";
                     }
-                    default -> throw new IllegalArgumentException("Unsupported logical expression type: " + expression.getClass().getName());
+                    default ->
+                            throw new IllegalArgumentException("Unsupported logical expression type: " + expression.getClass().getName());
                 }
                 String aSql = buildSqlWithoutPlaceholders(database, a);
                 String bSql = buildSqlWithoutPlaceholders(database, b);
                 yield "(" + aSql + ") " + operator + " (" + bSql + ")";
             }
             case IsNullExpression(Expression inner) -> "(" + buildSqlWithoutPlaceholders(database, inner) + ") IS NULL";
-            case IsNotNullExpression(Expression inner) -> "(" + buildSqlWithoutPlaceholders(database, inner) + ") IS NOT NULL";
-            default -> throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
+            case IsNotNullExpression(Expression inner) ->
+                    "(" + buildSqlWithoutPlaceholders(database, inner) + ") IS NOT NULL";
+            default ->
+                    throw new IllegalArgumentException("Unsupported expression type: " + expression.getClass().getName());
         };
     }
 }

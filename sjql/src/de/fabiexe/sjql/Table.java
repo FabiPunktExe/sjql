@@ -19,7 +19,7 @@ import java.util.function.Predicate;
 /**
  * This class represents a database table. It provides methods to define columns, insert data, and perform queries.
  *
- * @param <T> The type of the objects that represent rows in this table.
+ * @param <T> The type of the objects that represent rows in this table
  */
 public class Table<T extends @Nullable Object> {
     private final Class<T> type;
@@ -331,17 +331,40 @@ public class Table<T extends @Nullable Object> {
     }
 
     /**
-     * Creates a new query for selecting objects of type {@code T} from this table.
+     * Creates a reference to this table without an alias.
+     *
+     * @return A {@link TableRef} referring to this table
+     */
+    public TableRef<T> ref() {
+        return new TableRefImpl<>(this, null);
+    }
+
+    /**
+     * Creates a reference to this table with the given alias.
+     *
+     * @param alias The alias to use for this table
+     * @return A {@link TableRef} referring to this table under the given alias
+     * @throws IllegalArgumentException If the alias is blank
+     */
+    public TableRef<T> alias(String alias) {
+        if (alias.isBlank()) {
+            throw new IllegalArgumentException("alias must not be blank");
+        } else {
+            return new TableRefImpl<>(this, alias);
+        }
+    }
+
+    /**
+     * Creates a new query for selecting objects of type {@link T} from this table.
      *
      * @return A {@link Query} that can be used to specify and execute the selection operation
      * @throws IllegalStateException If this method is not called inside a transaction
      * @see Database#transaction(Runnable)
      */
     public Query<List<T>> select() {
-        if (!Database.CURRENT_DATABASE.isBound()) {
-            throw new IllegalStateException("This method can only be called inside a transaction");
-        }
-        return Database.CURRENT_DATABASE.get().select(this);
+        return Database.CURRENT_DATABASE
+                .orElseThrow(() -> new IllegalStateException("This method can only be called inside a transaction"))
+                .select(this);
     }
 
     /**

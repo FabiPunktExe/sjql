@@ -3,6 +3,11 @@ product: jvm/lib
 apply: 
   - //publishing.module-template.yaml
 
+settings: 
+  publishing:
+    artifactId: sjql-kotlin
+    publishSources: true
+
 dependencies:
   - //sjql
   - $libs.kotlinx.coroutines.core

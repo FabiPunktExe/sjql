@@ -1,7 +1,9 @@
 package de.fabiexe.sjql.query;
 
 import de.fabiexe.sjql.Table;
+import de.fabiexe.sjql.TableRef;
 import de.fabiexe.sjql.column.Column;
+import de.fabiexe.sjql.column.ColumnRef;
 import de.fabiexe.sjql.database.BasicDatabase;
 import de.fabiexe.sjql.expression.Expression;
 import de.fabiexe.sjql.expression.constant.ConstantExpression;
@@ -20,25 +22,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A query that returns raw {@link ReadableRow} instances.
- *
- * @param <T> the type of the objects that represent rows in the queried table
- */
-public class BasicRowQuery<T extends @Nullable Object> extends BasicQuery<T, List<ReadableRow>> {
+/** A query that returns raw {@link ReadableRow} instances. */
+public class BasicRowQuery extends BasicQuery<List<ReadableRow>> {
     /**
-     * Creates a new row query for the given table.
+     * Creates a new row query for the given tables.
      *
-     * @param database the database to query
-     * @param table the table to query
-     * @param connectionSupplier supplier for the database connection
+     * @param database The database to query
+     * @param tables The tables to query
+     * @param connectionSupplier A supplier for the database connection
      */
     public BasicRowQuery(
             BasicDatabase database,
-            Table<T> table,
+            List<TableRef<?>> tables,
             ThrowingSupplier<Connection, SQLException> connectionSupplier
     ) {
-        super(database, table, connectionSupplier);
+        super(database, tables, connectionSupplier);
+    }
+
+    /**
+     * Creates a new row query for the given table.
+     *
+     * @param database The database to query
+     * @param table The table to query
+     * @param connectionSupplier A supplier for the database connection
+     */
+    public BasicRowQuery(
+            BasicDatabase database,
+            Table<?> table,
+            ThrowingSupplier<Connection, SQLException> connectionSupplier
+    ) {
+        this(database, List.of(table.ref()), connectionSupplier);
     }
 
     @Override
@@ -53,13 +66,16 @@ public class BasicRowQuery<T extends @Nullable Object> extends BasicQuery<T, Lis
                 ResultSet resultSet = statement.executeQuery();
                 List<ReadableRow> result = new ArrayList<>();
                 while (resultSet.next()) {
-                    Map<Column<?>, @Nullable Object> rowContent = new HashMap<>();
-                    List<Column<?>> columns = table.getColumns();
-                    for (int i = 0; i < columns.size(); i++) {
-                        Column<?> column = columns.get(i);
-                        rowContent.put(column, SQLUtil.getObject(resultSet, i + 1, column));
+                    Map<ColumnRef<?>, @Nullable Object> rowContent = new HashMap<>();
+                    int i = 0;
+                    for (TableRef<?> tableRef : tables) {
+                        List<Column<?>> columns = tableRef.getTable().getColumns();
+                        for (int j = 0; j < columns.size(); i++, j++) {
+                            Column<?> column = columns.get(j);
+                            rowContent.put(tableRef.column(column), SQLUtil.getObject(resultSet, i + 1, column));
+                        }
                     }
-                    result.add(new BasicReadableRow<>(table, rowContent));
+                    result.add(new BasicReadableRow(tables, rowContent));
                 }
                 return result;
             }
@@ -68,7 +84,7 @@ public class BasicRowQuery<T extends @Nullable Object> extends BasicQuery<T, Lis
 
     private Map.Entry<String, List<ConstantExpression<?>>> buildSql() {
         StringBuilder sql = new StringBuilder("SELECT * FROM ")
-                .append(database.escapeTableName(table.getName()));
+                .append(SQLUtil.buildFromClause(database, tables));
         List<ConstantExpression<?>> parameters = new ArrayList<>();
         if (condition != null) {
             sql.append(" WHERE ");

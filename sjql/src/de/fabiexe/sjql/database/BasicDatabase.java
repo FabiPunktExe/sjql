@@ -308,7 +308,17 @@ public abstract class BasicDatabase implements Database {
 
     @Override
     public <T extends @Nullable Object> Query<List<ReadableRow>> selectRows(Table<T> table) {
-        return new BasicRowQuery<>(this, table, dataSource::getConnection);
+        return combine(table.ref());
+    }
+
+    @Override
+    public Query<List<ReadableRow>> combine(TableRef<?> first, TableRef<?>... others) {
+        List<TableRef<?>> tables = new ArrayList<>(1 + others.length);
+        tables.add(Objects.requireNonNull(first, "first must not be null"));
+        for (TableRef<?> other : others) {
+            tables.add(Objects.requireNonNull(other, "others must not contain null"));
+        }
+        return new BasicRowQuery(this, tables, dataSource::getConnection);
     }
 
     @Override

@@ -11,7 +11,8 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("de.fabiexe:sjql:0.4.0")
+    implementation("de.fabiexe:sjql:0.7.0")
+    implementation("de.fabiexe:sjql-kotlin:0.7.0")
 }
 ```
 
@@ -30,7 +31,12 @@ dependencies {
     <dependency>
         <groupId>de.fabiexe</groupId>
         <artifactId>sjql</artifactId>
-        <version>0.4.0</version>
+        <version>0.7.0</version>
+    </dependency>
+    <dependency>
+        <groupId>de.fabiexe</groupId>
+        <artifactId>sjql-kotlin</artifactId>
+        <version>0.7.0</version>
     </dependency>
 </dependencies>
 ```
@@ -85,6 +91,33 @@ public void example() throws SQLException {
         Coffee.TABLE.delete()
                 .where(Coffee.NAME.eq("Espresso"))
                 .execute();
+    });
+}
+```
+
+### Combining tables
+
+```java
+public record Purchase(int id, String coffeeName, int amount) {
+    public static final Table<Purchase> TABLE = new Table<>(Purchase.class, "purchase");
+    public static final Column<Integer> ID = TABLE.intColumn("id").notNull();
+    public static final Column<String> COFFEE_NAME = TABLE.stringColumn("coffee_name", 64).notNull();
+    public static final Column<Integer> AMOUNT = TABLE.intColumn("amount").notNull();
+}
+
+public void combineExample() throws SQLException {
+    Database database = Database.create(dataSource);
+
+    database.throwingTransaction(() -> {
+        TableRef<Coffee> coffee = Coffee.TABLE.alias("c");
+        TableRef<Purchase> purchase = Purchase.TABLE.alias("p");
+
+        List<ReadableRow> rows = coffee.combine(purchase)
+                .where(coffee.column(Coffee.NAME).eq(purchase.column(Purchase.COFFEE_NAME)))
+                .executeNotNull();
+
+        String name = rows.getFirst().get(coffee.column(Coffee.NAME));
+        int amount = rows.getFirst().get(purchase.column(Purchase.AMOUNT));
     });
 }
 ```

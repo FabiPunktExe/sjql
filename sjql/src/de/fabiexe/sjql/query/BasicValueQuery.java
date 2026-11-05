@@ -13,11 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A query that returns mapped objects of type {@code T}.
+ * A query that returns mapped objects of type {@link T}.
  *
- * @param <T> the type of the objects that represent rows in the queried table
+ * @param <T> The type of the objects that represent rows in the queried table
  */
-public class BasicValueQuery<T extends @Nullable Object> extends BasicQuery<T, List<T>> {
+public class BasicValueQuery<T extends @Nullable Object> extends BasicQuery<List<T>> {
+    private final Table<T> table;
+
     /**
      * Creates a new value query for the given table.
      *
@@ -30,13 +32,14 @@ public class BasicValueQuery<T extends @Nullable Object> extends BasicQuery<T, L
             Table<T> table,
             ThrowingSupplier<Connection, SQLException> connectionSupplier
     ) {
-        super(database, table, connectionSupplier);
+        super(database, List.of(table.ref()), connectionSupplier);
+        this.table = table;
     }
 
     @Override
     public @Nullable List<T> execute() throws SQLException {
         List<T> result = new ArrayList<>();
-        Query<List<ReadableRow>> rowQuery = new BasicRowQuery<>(database, table, connectionSupplier)
+        Query<List<ReadableRow>> rowQuery = new BasicRowQuery(database, tables, connectionSupplier)
                 .where(condition)
                 .orderBy(ordering)
                 .limit(limit);

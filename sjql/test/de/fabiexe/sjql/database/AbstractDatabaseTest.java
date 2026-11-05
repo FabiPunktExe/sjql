@@ -1,10 +1,9 @@
 package de.fabiexe.sjql.database;
 
-import de.fabiexe.sjql.Coffee;
-import de.fabiexe.sjql.CompositeKey;
-import de.fabiexe.sjql.Database;
-import de.fabiexe.sjql.Table;
+import de.fabiexe.sjql.*;
 import de.fabiexe.sjql.column.Column;
+import de.fabiexe.sjql.expression.Expression;
+import de.fabiexe.sjql.row.ReadableRow;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +36,12 @@ public abstract class AbstractDatabaseTest {
     public void cleanup() throws SQLException {
         if (database.tableExists(Coffee.TABLE)) {
             database.deleteTable(Coffee.TABLE);
+        }
+        if (database.tableExists(Purchase.TABLE)) {
+            database.deleteTable(Purchase.TABLE);
+        }
+        if (database.tableExists(Employee.TABLE)) {
+            database.deleteTable(Employee.TABLE);
         }
     }
 
@@ -251,6 +256,135 @@ public abstract class AbstractDatabaseTest {
                     row.set(CompositeKey.DATA, "C");
                 });
             });
+        });
+    }
+
+    @Test
+    public void testImplicitJoinWithAliases() throws SQLException {
+        database.createTable(Purchase.TABLE);
+        database.throwingTransaction(() -> {
+            insertCoffee("Espresso", 2.5);
+            insertCoffee("Latte", 3.5);
+            insertPurchase(1, "Espresso", 2);
+            insertPurchase(2, "Latte", 1);
+            insertPurchase(3, "Espresso", 5);
+        });
+
+        TableRef<Coffee> coffee = Coffee.TABLE.alias("c");
+        TableRef<Purchase> purchase = Purchase.TABLE.alias("p");
+        List<ReadableRow> rows = database.throwingTransaction(() -> coffee.combine(purchase)
+                .where(coffee.column(Coffee.NAME).eq(purchase.column(Purchase.COFFEE_NAME)))
+                .orderBy(coffee.column(Coffee.NAME), true)
+                .orderBy(purchase.column(Purchase.AMOUNT), true)
+                .executeNotNull());
+
+        assertEquals(3, rows.size());
+        assertEquals("Espresso", rows.get(0).get(coffee.column(Coffee.NAME)));
+        assertEquals(2, rows.get(0).get(purchase.column(Purchase.AMOUNT)).intValue());
+        assertEquals("Espresso", rows.get(1).get(coffee.column(Coffee.NAME)));
+        assertEquals(5, rows.get(1).get(purchase.column(Purchase.AMOUNT)).intValue());
+        assertEquals("Latte", rows.get(2).get(coffee.column(Coffee.NAME)));
+    }
+
+    @Test
+    public void testImplicitJoinAutoQualifiesPlainColumns() throws SQLException {
+        database.createTable(Purchase.TABLE);
+        database.throwingTransaction(() -> {
+            insertCoffee("Espresso", 2.5);
+            insertPurchase(1, "Espresso", 2);
+        });
+
+        List<ReadableRow> rows = database.throwingTransaction(() ->
+                Coffee.TABLE.ref().combine(Purchase.TABLE.ref())
+                        .where(Coffee.NAME.eq(Purchase.COFFEE_NAME))
+                        .executeNotNull());
+
+        assertEquals(1, rows.size());
+        assertEquals("Espresso", rows.getFirst().get(Coffee.NAME));
+        assertEquals(2, rows.getFirst().get(Purchase.AMOUNT).intValue());
+    }
+
+    @Test
+    public void testSelfJoinWithAliases() throws SQLException {
+        database.createTable(Employee.TABLE);
+        database.throwingTransaction(() -> {
+            Employee.TABLE.insert(row -> {
+                row.set(Employee.ID, 1);
+                row.set(Employee.NAME, "Alice");
+            });
+            Employee.TABLE.insert(row -> {
+                row.set(Employee.ID, 2);
+                row.set(Employee.NAME, "Bob");
+                row.set(Employee.MANAGER_ID, 1);
+            });
+        });
+
+        TableRef<Employee> employee = Employee.TABLE.alias("e");
+        TableRef<Employee> manager = Employee.TABLE.alias("m");
+        List<ReadableRow> rows = database.throwingTransaction(() -> employee.combine(manager)
+                .where(employee.column(Employee.MANAGER_ID).eq(manager.column(Employee.ID)))
+                .executeNotNull());
+
+        assertEquals(1, rows.size());
+        assertEquals("Bob", rows.getFirst().get(employee.column(Employee.NAME)));
+        assertEquals("Alice", rows.getFirst().get(manager.column(Employee.NAME)));
+        assertThrows(IllegalArgumentException.class, () -> rows.getFirst().get(Employee.NAME));
+    }
+
+    @Test
+    public void testJoinCountOrderByAndLimit() throws SQLException {
+        database.createTable(Purchase.TABLE);
+        database.throwingTransaction(() -> {
+            insertCoffee("Espresso", 2.5);
+            insertCoffee("Latte", 3.5);
+            insertPurchase(1, "Espresso", 2);
+            insertPurchase(2, "Latte", 1);
+            insertPurchase(3, "Espresso", 5);
+        });
+
+        TableRef<Coffee> coffee = Coffee.TABLE.alias("c");
+        TableRef<Purchase> purchase = Purchase.TABLE.alias("p");
+        Expression joinCondition = coffee.column(Coffee.NAME).eq(purchase.column(Purchase.COFFEE_NAME));
+
+        long count = database.throwingTransaction(() ->
+                coffee.combine(purchase).where(joinCondition).count().executeNotNull());
+        assertEquals(3, count);
+
+        List<ReadableRow> rows = database.throwingTransaction(() ->
+                coffee.combine(purchase)
+                        .where(joinCondition)
+                        .orderBy(coffee.column(Coffee.NAME), true)
+                        .limit(2L)
+                        .executeNotNull());
+
+        assertEquals(2, rows.size());
+        assertEquals("Espresso", rows.getFirst().get(coffee.column(Coffee.NAME)));
+    }
+
+    @Test
+    public void testJoinValidation() {
+        assertThrows(IllegalArgumentException.class, () ->
+                database.throwingTransaction(() -> Coffee.TABLE.alias("x").combine(Coffee.TABLE.alias("x"))));
+        assertThrows(IllegalArgumentException.class, () ->
+                database.throwingTransaction(() -> Coffee.TABLE.ref().combine(Coffee.TABLE.ref())));
+        assertThrows(IllegalArgumentException.class, () ->
+                database.throwingTransaction(() -> Purchase.TABLE.alias("coffee").combine(Coffee.TABLE.ref())));
+        assertThrows(IllegalArgumentException.class, () -> Coffee.TABLE.alias(" "));
+        assertThrows(IllegalArgumentException.class, () -> Coffee.TABLE.alias("c").column(Purchase.COFFEE_NAME));
+    }
+
+    private void insertCoffee(String name, double price) throws SQLException {
+        Coffee.TABLE.insert(row -> {
+            row.set(Coffee.NAME, name);
+            row.set(Coffee.PRICE, price);
+        });
+    }
+
+    private void insertPurchase(int id, String coffeeName, int amount) throws SQLException {
+        Purchase.TABLE.insert(row -> {
+            row.set(Purchase.ID, id);
+            row.set(Purchase.COFFEE_NAME, coffeeName);
+            row.set(Purchase.AMOUNT, amount);
         });
     }
 }
