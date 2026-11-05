@@ -1,4 +1,4 @@
-name: Build
+name: Build and Test
 
 on:
   push:
@@ -9,12 +9,7 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v7
-      - name: Setup Java
-        uses: actions/setup-java@v6
-        with:
-          java-version: 21
-          distribution: temurin
       - name: Build
-        run: |
-          chmod +x ./gradlew
-          ./gradlew build --stacktrace
+        run: ./kotlin build
+      - name: Test
+        run: ./kotlin test
