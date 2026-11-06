@@ -1,9 +1,9 @@
 product: jvm/lib
 
-apply: 
+apply:
   - //publishing.module-template.yaml
 
-settings: 
+settings:
   publishing:
     artifactId: sjql-kotlin
     publishSources: true
